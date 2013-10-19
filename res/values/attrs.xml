@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DashboardWidget">
+        <attr name="widgetType" format="enum">
+            <enum name="date" value="1"/>
+            <enum name="time" value="2"/>
+            <enum name="datetime" value="3"/>
+            <enum name="lat" value="4"/>
+            <enum name="lon" value="5"/>
+            <enum name="latlon" value="6"/>
+            <enum name="altitude" value="7"/>
+            <enum name="accuracy" value="8"/>
+            <enum name="satellites" value="9"/>
+            <enum name="map" value="10"/>
+            <enum name="gpsDate" value="11"/>
+            <enum name="gpsTime" value="12"/>
+            <enum name="gpsDateTime" value="13"/>
+            <enum name="speed" value="16"/>
+            <enum name="vam" value="17"/>
+            <enum name="heading" value="18"/>
+            <enum name="batteryLevel" value="32"/>
+            <enum name="batteryTemp" value="33"/>
+            <enum name="batteryVoltage" value="34"/>
+            <enum name="distance" value="64"/>
+            <enum name="duration" value="65"/>
+            <enum name="averageSpeed" value="66"/>
+            <enum name="maxSpeed" value="67"/>
+            <enum name="heightGain" value="68"/>
+            <enum name="minAltitude" value="69"/>
+            <enum name="maxAltitude" value="70"/>
+            <enum name="routeOffset" value="96"/>
+            <enum name="routeDistance" value="97"/>
+            <enum name="routeHeightGain" value="98"/>
+            <enum name="routeDuration" value="99"/>
+            <enum name="routeETA" value="100"/>
+            <enum name="routeTrueSpeed" value="101"/>
+            <enum name="bearing" value="128"/>
+            <enum name="pointDistance" value="129"/>
+            <enum name="pointTrueSpeed" value="130"/>
+        </attr>
+        <attr name="units" format="enum">
+            <enum name="metric" value="1"/>
+            <enum name="imperial" value="2"/>
+            <enum name="SI" value="3"/>
+            <enum name="nautical" value="4"/>
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="AutoResizeTextView">
+        <attr name="minTextSize" format="float"/>
+        <attr name="maxTextSize" format="float"/>
+    </declare-styleable>
+</resources>

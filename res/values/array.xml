@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="unit_conversion_speed">
+        <item>3.6</item>          <!-- Metric: km/h -->
+        <item>2.23694</item>      <!-- Imperial: mph -->
+        <item>1</item>            <!-- SI: m/s -->
+        <item>1.94384</item>      <!-- Nautical: knot -->
+    </array>
+    <array name="unit_conversion_distance">
+        <item>0.001</item>              <!-- Metric: km -->
+        <item>0.000621371192</item>    <!-- Imperial: mi -->
+        <item>1</item>           <!-- SI: m -->
+        <item>0.000539956803</item>    <!-- Nautical: naut. mi -->
+    </array>
+    <array name="unit_conversion_shortdistance">
+        <item>1</item>              <!-- Metric: m -->
+        <item>3.2808399</item>      <!-- Imperial: ft -->
+        <item>1</item>              <!-- SI: m -->
+    </array>
+    <string-array name="widget_units">
+        <item>Default</item>
+        <item>Metric</item>
+        <item>Imperial</item>
+        <item>SI</item>
+        <item>Nautical</item>
+    </string-array>
+    <string-array name="widget_unit_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+</resources>

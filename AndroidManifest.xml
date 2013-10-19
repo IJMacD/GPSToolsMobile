@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ijmacd.gpstools.mobile"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Gpstools" >
+        <activity
+            android:name="com.ijmacd.gpstools.mobile.DashboardActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.ijmacd.gpstools.mobile.TrackListActivity" >
+        </activity>
+        <activity
+            android:name="com.ijmacd.gpstools.mobile.TrackDetailActivity"
+            android:parentActivityName="com.ijmacd.gpstools.mobile.TrackListActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.ijmacd.gpstools.mobile.TrackListActivity" />
+        </activity>
+        <activity
+            android:name="com.ijmacd.gpstools.mobile.SettingsActivity" >
+        </activity>
+        <activity
+            android:name="com.ijmacd.gpstools.mobile.EditWidgetDialog"
+            android:theme="@android:style/Theme.Holo.Light.Dialog.MinWidth">
+        </activity>
+        <service
+            android:name="com.ijmacd.gpstools.mobile.TrackService"  >
+        </service>
+    </application>
+
+</manifest>

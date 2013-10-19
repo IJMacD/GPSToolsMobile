@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_freq">
+        <item>1 sec</item>
+        <item>5 sec</item>
+        <item>10 sec</item>
+        <item>30 sec</item>
+        <item>1 min</item>
+        <item>5 min</item>
+        <item>10 min</item>
+        <item>30 min</item>
+        <item>1 hour</item>
+    </string-array>
+    <string-array name="pref_freq_values">
+        <item>1000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>300000</item>
+        <item>600000</item>
+        <item>1800000</item>
+        <item>3600000</item>
+    </string-array>
+</resources>

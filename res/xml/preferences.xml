@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="@string/pref_units_key"
+        android:title="@string/pref_units"
+        android:entries="@array/pref_unit_types"
+        android:entryValues="@array/pref_unit_values"
+        android:defaultValue="@integer/default_unit"/>
+    <ListPreference
+        android:key="@string/pref_display_freq_key"
+        android:title="@string/pref_display_freq"
+        android:entries="@array/pref_freq"
+        android:entryValues="@array/pref_freq_values"
+        android:defaultValue="@integer/default_display_freq"/>
+    <ListPreference
+        android:key="@string/pref_record_freq_key"
+        android:title="@string/pref_record_freq"
+        android:entries="@array/pref_freq"
+        android:entryValues="@array/pref_freq_values"
+        android:defaultValue="@integer/default_record_freq"/>
+</PreferenceScreen>

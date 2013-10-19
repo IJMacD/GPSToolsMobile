@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            android:layout_gravity="left|center_vertical"
+            android:textSize="28sp"
+            android:textIsSelectable="true"
+            android:paddingEnd="16dp"
+            android:textColor="#777777"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/name_text"
+            android:layout_gravity="left|center_vertical"
+            android:textSize="32sp"
+            android:editable="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start Date"
+            android:layout_gravity="left|center_vertical"
+            android:paddingEnd="16dp"
+            android:textSize="20sp"
+            android:textColor="#777777"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/start_text"
+            android:layout_gravity="left|center_vertical"
+            android:textSize="24sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance"
+            android:layout_gravity="left|center_vertical"
+            android:paddingEnd="16dp"
+            android:textSize="20sp"
+            android:textColor="#777777"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/distance_text"
+            android:layout_gravity="left|center_vertical"
+            android:textSize="24sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Duration"
+            android:layout_gravity="left|center_vertical"
+            android:paddingEnd="16dp"
+            android:textSize="20sp"
+            android:textColor="#777777"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/duration_text"
+            android:layout_gravity="left|center_vertical"
+            android:textSize="24sp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Average Speed"
+        android:layout_gravity="left|center_vertical"
+        android:paddingEnd="16dp"
+        android:textSize="20sp"
+        android:textColor="#777777"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/speed_text"
+        android:layout_gravity="left|center_vertical"
+        android:textSize="24sp"/>
+
+</LinearLayout>

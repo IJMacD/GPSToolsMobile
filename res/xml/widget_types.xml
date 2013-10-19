@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget_types>
+    <widget>
+        <name>Date</name>
+        <description>The current system date</description>
+        <type>32</type>
+        <category>system</category>
+    </widget>
+    <widget>
+        <name>Time</name>
+        <description>The current system time</description>
+        <type>33</type>
+        <category>system</category>
+    </widget>
+    <widget>
+        <name>DateTime</name>
+        <description>The current system date and time</description>
+        <type>34</type>
+        <category>system</category>
+    </widget>
+    <widget>
+        <name>Latitude</name>
+        <description>The current latitude</description>
+        <type>4</type>
+        <category>gps</category>
+    </widget>
+    <widget>
+        <name>Longitude</name>
+        <description>The current longitude</description>
+        <type>5</type>
+        <category>gps</category>
+    </widget>
+    <widget>
+        <name>Latitude / Longitude</name>
+        <description>The current latitude and longitude</description>
+        <type>6</type>
+        <category>gps</category>
+    </widget>
+    <widget>
+        <name>Altitude</name>
+        <description>The current altitude</description>
+        <type>7</type>
+        <category>gps</category>
+    </widget>
+    <widget>
+        <name>Accuracy</name>
+        <description>The current GPS accuracy</description>
+        <type>8</type>
+        <category>gps</category>
+    </widget>
+    <widget>
+        <name>Satellites</name>
+        <description>The current number of GPS satellites</description>
+        <type>9</type>
+        <category>gps</category>
+    </widget>
+    <widget>
+        <name>GPS Date</name>
+        <description>The date of the last GPS fix</description>
+        <type>1</type>
+        <category>gps</category>
+    </widget>
+    <widget>
+        <name>GPS Time</name>
+        <description>The time of the last GPS fix</description>
+        <type>2</type>
+        <category>gps</category>
+    </widget>
+    <widget>
+        <name>GPS DateTime</name>
+        <description>The date and time of the last GPS fix</description>
+        <type>3</type>
+        <category>gps</category>
+    </widget>
+    <widget>
+        <name>Battery Level</name>
+        <description>The current battery level</description>
+        <type>35</type>
+        <category>system</category>
+    </widget>
+    <widget>
+        <name>Distance</name>
+        <description>The current track distance</description>
+        <type>64</type>
+        <category>track</category>
+    </widget>
+    <widget>
+        <name>Duration</name>
+        <description>The current track duration</description>
+        <type>65</type>
+        <category>track</category>
+    </widget>
+    <widget>
+        <name>Average Speed</name>
+        <description>The current track average speed</description>
+        <type>66</type>
+        <category>track</category>
+    </widget>
+    <widget>
+        <name>Route Offset</name>
+        <description>The distance from the nearest point on the route</description>
+        <type>96</type>
+        <category>route</category>
+    </widget>
+    <widget>
+        <name>Bearing</name>
+        <description>The bearing towards the point</description>
+        <type>128</type>
+        <category>point</category>
+    </widget>
+</widget_types>
