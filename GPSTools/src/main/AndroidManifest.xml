@@ -30,7 +30,12 @@
         </activity>
         <activity
             android:name="com.ijmacd.gpstools.mobile.TrackDetailActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:parentActivityName="com.ijmacd.gpstools.mobile.TrackListActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.ijmacd.gpstools.mobile.TrackListActivity" />
         </activity>
         <activity
             android:name="com.ijmacd.gpstools.mobile.SettingsActivity"
