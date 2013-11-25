@@ -1,21 +1,22 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/action_add"
         android:orderInCategory="1"
-        android:showAsAction="always"
+        app:showAsAction="always"
         android:icon="@android:drawable/ic_menu_add"
         android:title="@string/action_add"/>
     <item
         android:id="@+id/action_record"
         android:orderInCategory="2"
-        android:showAsAction="always"
+        app:showAsAction="always"
         android:icon="@drawable/ic_menu_recording"
         android:title="@string/action_record"/>
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:title="@string/action_settings"/>
 
 </menu>
