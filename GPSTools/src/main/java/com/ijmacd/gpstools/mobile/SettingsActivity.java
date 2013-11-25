@@ -13,6 +13,8 @@ public class SettingsActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private String mPreferenceUnitsKey;
+    private String mPreferenceDisplayFrequencyKey;
+    private String mPreferenceRecordFrequencyKey;
     private SharedPreferences mSharedPreferences;
 
     @Override
@@ -21,13 +23,28 @@ public class SettingsActivity extends PreferenceActivity
 
         final Resources res = getResources();
         mPreferenceUnitsKey = res.getString(R.string.pref_units_key);
+        mPreferenceDisplayFrequencyKey = res.getString(R.string.pref_display_freq_key);
+        mPreferenceRecordFrequencyKey = res.getString(R.string.pref_record_freq_key);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mSharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
         addPreferencesFromResource(R.xml.preferences);
 
-        setUnitsSummary();
+        setSummary(mPreferenceUnitsKey,
+                res.getStringArray(R.array.pref_unit_types),
+                res.getStringArray(R.array.pref_unit_values)
+        );
+
+        setSummary(mPreferenceDisplayFrequencyKey,
+                res.getStringArray(R.array.pref_freq),
+                res.getStringArray(R.array.pref_freq_values)
+        );
+
+        setSummary(mPreferenceRecordFrequencyKey,
+                res.getStringArray(R.array.pref_freq),
+                res.getStringArray(R.array.pref_freq_values)
+        );
 
 //        ActionBar actionBar = getSupportActionBar();
 //        actionBar.setDisplayHomeAsUpEnabled(true);
@@ -48,20 +65,29 @@ public class SettingsActivity extends PreferenceActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        final Resources res = getResources();
         if(key.equals(mPreferenceUnitsKey)){
-            setUnitsSummary();
+            setSummary(key,
+                    res.getStringArray(R.array.pref_unit_types),
+                    res.getStringArray(R.array.pref_unit_values)
+            );
+        }
+        else if(key.equals(mPreferenceDisplayFrequencyKey) ||
+                key.equals(mPreferenceRecordFrequencyKey)){
+            setSummary(key,
+                    res.getStringArray(R.array.pref_freq),
+                    res.getStringArray(R.array.pref_freq_values)
+            );
         }
     }
 
-    private void setUnitsSummary() {
+    private void setSummary(String key, String[] labels, String[] values) {
         final Resources res = getResources();
-        Preference defaultUnits = findPreference(mPreferenceUnitsKey);
-        String[] labels = res.getStringArray(R.array.pref_unit_types);
-        String[] values = res.getStringArray(R.array.pref_unit_values);
-        String value = mSharedPreferences.getString(mPreferenceUnitsKey, res.getInteger(R.integer.default_unit)+"");
+        Preference pref = findPreference(key);
+        String value = mSharedPreferences.getString(key, "");
         for(int i = values.length - 1; i >= 0; i--){
             if(value.equals(values[i])){
-                defaultUnits.setSummary(labels[i]);
+                pref.setSummary(labels[i]);
             }
         }
     }
