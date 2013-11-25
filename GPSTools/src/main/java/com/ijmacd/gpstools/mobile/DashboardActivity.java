@@ -21,6 +21,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -101,7 +102,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         mGridLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mActionMode != null){
+                if (mActionMode != null) {
                     mActionMode.finish();
                 }
             }
@@ -359,9 +360,28 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     }
 
     private int mDragStartIndex;
+    private int mLastXTouch;
+    private int mLastYTouch;
+
+    private View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            final int action = event.getAction();
+            switch (action & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN: {
+                    mLastXTouch = (int) event.getX();
+                    mLastYTouch = (int) event.getY();
+                    break;
+                }
+            }
+            return false;
+        }
+    };
+
     private View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View view) {
+            final View _view = view;
 
             if(mActionMode != null){
                 mActionMode.finish();
@@ -369,7 +389,16 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
             mDragStartIndex = mGridLayout.indexOfChild(view);
             mGridLayout.addView(mSpace, mDragStartIndex);
-            view.startDrag(null, new View.DragShadowBuilder(view), view, 0);
+            View.DragShadowBuilder dragShadowBuilder = new View.DragShadowBuilder(view){
+                @Override
+                public void onProvideShadowMetrics(android.graphics.Point dimensions, android.graphics.Point touch_point){
+                    dimensions.x = getView().getWidth();
+                    dimensions.y = getView().getHeight();
+                    touch_point.x = mLastXTouch;
+                    touch_point.y = mLastYTouch;
+                }
+            };
+            view.startDrag(null, dragShadowBuilder, view, 0);
             view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             mGridLayout.removeView(view);
 
@@ -615,6 +644,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
         widget.setLayoutParams(params);
 
+        widget.setOnTouchListener(mOnTouchListener);
         widget.setOnLongClickListener(mLongClickListener);
         widget.setOnClickListener(mClickListener);
         widget.setOnDragListener(mDragListener);
