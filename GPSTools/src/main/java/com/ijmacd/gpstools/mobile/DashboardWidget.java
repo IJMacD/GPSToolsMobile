@@ -252,23 +252,21 @@ public class DashboardWidget extends FrameLayout
                 };
                 break;
             case WIDGET_BATTERY_LEVEL:
-                mBatteryFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-                mReceiver = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
-                            setValue(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0));
-                        }
-                    }
-                };
-                break;
             case WIDGET_BATTERY_TEMP:
+            case WIDGET_BATTERY_VOLT:
                 mBatteryFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
                 mReceiver = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
-                            setValue(intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0)/10.0f);
+                            float value = 0;
+                            if(mWidgetType == WIDGET_BATTERY_LEVEL)
+                                value = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                            else if(mWidgetType == WIDGET_BATTERY_TEMP)
+                                value = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f;
+                            else if(mWidgetType == WIDGET_BATTERY_VOLT)
+                                value = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) / 1000f;
+                            setValue(value);
                         }
                     }
                 };
@@ -331,6 +329,7 @@ public class DashboardWidget extends FrameLayout
         switch (mWidgetType) {
             case WIDGET_BATTERY_LEVEL:
             case WIDGET_BATTERY_TEMP:
+            case WIDGET_BATTERY_VOLT:
                 mContext.unregisterReceiver(mReceiver);
                 break;
             case WIDGET_DATE:
@@ -361,6 +360,7 @@ public class DashboardWidget extends FrameLayout
         switch(mWidgetType)  {
             case WIDGET_BATTERY_LEVEL:
             case WIDGET_BATTERY_TEMP:
+            case WIDGET_BATTERY_VOLT:
                 mContext.registerReceiver(mReceiver, mBatteryFilter);
                 break;
             case WIDGET_DATE:
@@ -520,6 +520,9 @@ public class DashboardWidget extends FrameLayout
             case WIDGET_BATTERY_TEMP:
                 text = res.getString(R.string.units_battery_temp);
                 break;
+            case WIDGET_BATTERY_VOLT:
+                text = res.getString(R.string.units_battery_volt);
+                break;
         }
         if(text == null && values != null && values.length >= units) {
             text = values[units-1];
@@ -532,6 +535,9 @@ public class DashboardWidget extends FrameLayout
             case WIDGET_SPEED:
             case WIDGET_SPEED_AVERAGE:
                 mValueFormat = "%.1f";
+                break;
+            case WIDGET_BATTERY_VOLT:
+                mValueFormat = "%.2f";
                 break;
             case WIDGET_LATITUDE:
                 mValueFormat = "%05.3f";

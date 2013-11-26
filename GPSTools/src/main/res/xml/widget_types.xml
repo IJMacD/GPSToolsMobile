@@ -85,6 +85,12 @@
         <category>system</category>
     </widget>
     <widget>
+        <name>Battery Voltage</name>
+        <description>The current battery voltage</description>
+        <type>37</type>
+        <category>system</category>
+    </widget>
+    <widget>
         <name>Distance</name>
         <description>The current track distance</description>
         <type>64</type>
