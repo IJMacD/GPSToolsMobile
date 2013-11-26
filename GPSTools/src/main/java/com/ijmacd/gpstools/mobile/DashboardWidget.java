@@ -262,6 +262,17 @@ public class DashboardWidget extends FrameLayout
                     }
                 };
                 break;
+            case WIDGET_BATTERY_TEMP:
+                mBatteryFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                mReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
+                            setValue(intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0)/10.0f);
+                        }
+                    }
+                };
+                break;
             case WIDGET_DATE:
             case WIDGET_TIME:
                 mHandler = new Handler();
@@ -319,6 +330,7 @@ public class DashboardWidget extends FrameLayout
     public void onPause(){
         switch (mWidgetType) {
             case WIDGET_BATTERY_LEVEL:
+            case WIDGET_BATTERY_TEMP:
                 mContext.unregisterReceiver(mReceiver);
                 break;
             case WIDGET_DATE:
@@ -348,6 +360,7 @@ public class DashboardWidget extends FrameLayout
 
         switch(mWidgetType)  {
             case WIDGET_BATTERY_LEVEL:
+            case WIDGET_BATTERY_TEMP:
                 mContext.registerReceiver(mReceiver, mBatteryFilter);
                 break;
             case WIDGET_DATE:
@@ -503,6 +516,9 @@ public class DashboardWidget extends FrameLayout
                 break;
             case WIDGET_BATTERY_LEVEL:
                 text = res.getString(R.string.units_battery_level);
+                break;
+            case WIDGET_BATTERY_TEMP:
+                text = res.getString(R.string.units_battery_temp);
                 break;
         }
         if(text == null && values != null && values.length >= units) {

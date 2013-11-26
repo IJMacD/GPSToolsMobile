@@ -63,4 +63,5 @@
     <string name="action_export">Export</string>
     <string name="track_saved">Track Saved</string>
     <string name="export_failed">Export failed. Mount sdcard first</string>
+    <string name="units_battery_temp">°C</string>
 </resources>

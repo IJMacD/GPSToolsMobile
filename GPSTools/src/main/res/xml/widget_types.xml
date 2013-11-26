@@ -79,6 +79,12 @@
         <category>system</category>
     </widget>
     <widget>
+        <name>Battery Temperature</name>
+        <description>The current battery temperature</description>
+        <type>36</type>
+        <category>system</category>
+    </widget>
+    <widget>
         <name>Distance</name>
         <description>The current track distance</description>
         <type>64</type>
