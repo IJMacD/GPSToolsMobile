@@ -111,20 +111,27 @@ public class DashboardWidget extends FrameLayout
 
     private static final boolean DEBUG = true;
     private ImageView mCategoryImage;
+    private Shader mTextShader;
+    private Matrix mTextShaderMatrix;
 
     public DashboardWidget(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mContext = context;
 
-        TypedArray attributes = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DashboardWidget, 0, 0);
-        try {
-            mWidgetType = attributes.getInteger(R.styleable.DashboardWidget_widgetType, 0);
-            mUnitsType = attributes.getInteger(R.styleable.DashboardWidget_units, UNITS_DEFAULT);
-            init();
-        }
-        finally {
-            attributes.recycle();
+        final Resources.Theme theme = context.getTheme();
+        if (theme != null) {
+            final TypedArray attributes = theme.obtainStyledAttributes(attrs, R.styleable.DashboardWidget, 0, 0);
+            if (attributes != null) {
+                try {
+                    mWidgetType = attributes.getInteger(R.styleable.DashboardWidget_widgetType, 0);
+                    mUnitsType = attributes.getInteger(R.styleable.DashboardWidget_units, UNITS_DEFAULT);
+                    init();
+                }
+                finally {
+                    attributes.recycle();
+                }
+            }
         }
 
     }
@@ -156,6 +163,18 @@ public class DashboardWidget extends FrameLayout
         mUnitsText = (TextView)findViewById(R.id.unit_text);
 
         mCategoryImage = (ImageView)findViewById(R.id.category_image);
+
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        mPreferences.registerOnSharedPreferenceChangeListener(this);
+
+        mTextShader = new LinearGradient(0, 0, 0, 1,
+                new int[]{Color.rgb(255,255,255),Color.rgb(128,128,128),Color.rgb(255,255,255)},
+                new float[]{0, 0.75f, 1}, Shader.TileMode.CLAMP);
+        mTextShaderMatrix = new Matrix();
+
+        mValueText.getPaint().setShader(mTextShader);
+
         if(mWidgetType == 0) {}
         else if(mWidgetType < 32){
             // Category GPS
@@ -163,7 +182,7 @@ public class DashboardWidget extends FrameLayout
         }
         else if (mWidgetType < 64){
             // Category System
-            if(mWidgetType < 35){
+            if (mWidgetType < 35) {
                 // System Date
             }
         }
@@ -179,10 +198,6 @@ public class DashboardWidget extends FrameLayout
             // Category Point
             mCategoryImage.setImageResource(R.drawable.category_point);
         }
-
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-
-        mPreferences.registerOnSharedPreferenceChangeListener(this);
 
         resetUpdateInterval();
 
@@ -266,7 +281,9 @@ public class DashboardWidget extends FrameLayout
                             case WIDGET_TIME:
                                 dateFormatter = new SimpleDateFormat("HH:mm:ss");
                         }
-                        mValueText.setText(dateFormatter.format(now));
+                        if (dateFormatter != null) {
+                            setFormattedValue(dateFormatter.format(now));
+                        }
                         mHandler.postDelayed(this, DATE_UPDATE_INTERVAL);
                     }
                 };
@@ -293,40 +310,6 @@ public class DashboardWidget extends FrameLayout
         setUnits(mUnitsType);
 
         onResume();
-    }
-
-    public void destroy(){
-        onPause();
-        onDestroy();
-    }
-
-    public void onDestroy() {
-        mContext = null;
-    }
-
-    public void onPause(){
-        switch (mWidgetType) {
-            case WIDGET_DATE:
-            case WIDGET_TIME:
-                mHandler.removeCallbacks(mRunnable);
-                break;
-            case WIDGET_ACCURACY:
-            case WIDGET_ALTITUDE:
-            case WIDGET_HEADING:
-            case WIDGET_LATITUDE:
-            case WIDGET_LONGITUDE:
-            case WIDGET_SPEED:
-            case WIDGET_GPSDATE:
-            case WIDGET_GPSTIME:
-                mLocationManager.removeUpdates(mLocationListener);
-                break;
-            case WIDGET_SATELLITES:
-                mLocationManager.removeGpsStatusListener(mGpsStatusListener);
-                break;
-        }
-
-
-        mPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     public void onResume() {
@@ -359,19 +342,68 @@ public class DashboardWidget extends FrameLayout
         mPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
+    public void onPause(){
+        switch (mWidgetType) {
+            case WIDGET_DATE:
+            case WIDGET_TIME:
+                mHandler.removeCallbacks(mRunnable);
+                break;
+            case WIDGET_ACCURACY:
+            case WIDGET_ALTITUDE:
+            case WIDGET_HEADING:
+            case WIDGET_LATITUDE:
+            case WIDGET_LONGITUDE:
+            case WIDGET_SPEED:
+            case WIDGET_GPSDATE:
+            case WIDGET_GPSTIME:
+                mLocationManager.removeUpdates(mLocationListener);
+                break;
+            case WIDGET_SATELLITES:
+                mLocationManager.removeGpsStatusListener(mGpsStatusListener);
+                break;
+        }
+
+
+        mPreferences.unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    public void onDestroy() {
+        mContext = null;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        int w = r - l;
+        int h = b - t;
+
+        // Scale text gradient
+        mTextShaderMatrix.setScale(1, h);
+        mTextShader.setLocalMatrix(mTextShaderMatrix);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        final Resources res = getResources();
+        if (res != null) {
+            if(key.equals(res.getString(R.string.pref_units_key))){
+                if(mDefaultUnits){
+                    setUnits(UNITS_DEFAULT);
+                }
+            }else if(key.equals(res.getString(R.string.pref_display_freq_key))){
+                resetUpdateInterval();
+            }
+        }
+    }
+
+    public void destroy(){
+        onPause();
+        onDestroy();
+    }
+
     public int getWidgetType(){
 		return mWidgetType;
 	}
-
-//  Cannot change widget type
-//
-//	private void setWidgetType(int type){
-//		mWidgetType = type;
-//        setValueFormat(mWidgetType);
-//        setUnitsText(mUnitsType);
-//		invalidate();
-//		requestLayout();
-//	}
 
 	public double getValue() {
 		return mValue;
@@ -385,7 +417,7 @@ public class DashboardWidget extends FrameLayout
         else {
             value = convertValue(value);
         }
-        mValueText.setText(String.format(mValueFormat, value));
+        setFormattedValue(String.format(mValueFormat, value));
 		invalidate();
 		requestLayout();
 	}
@@ -401,9 +433,11 @@ public class DashboardWidget extends FrameLayout
         if(units == UNITS_DEFAULT){
             mDefaultUnits = true;
             final Resources res = getResources();
-            mUnitsType = Integer.parseInt(mPreferences.getString(
-                    res.getString(R.string.pref_units_key),
-                    res.getInteger(R.integer.default_unit) + ""));
+            if (res != null) {
+                mUnitsType = Integer.parseInt(mPreferences.getString(
+                        res.getString(R.string.pref_units_key),
+                        res.getInteger(R.integer.default_unit) + ""));
+            }
         }
         else {
             mDefaultUnits = false;
@@ -414,47 +448,7 @@ public class DashboardWidget extends FrameLayout
         if(mValue != 0){
             setValue(mValue);
         }
-//        invalidate();
-//        requestLayout();
 	}
-
-    public void resetUpdateInterval(){
-        final String updateKey = getResources().getString(R.string.pref_display_freq_key);
-        final int interval = Integer.parseInt(mPreferences.getString(updateKey, GPS_UPDATE_INTERVAL + ""));
-        setUpdateInterval(interval);
-    }
-
-    public void setUpdateInterval(int interval){
-        if(interval != mUpdateInterval){
-            // TODO: hocus pocus
-        }
-        mUpdateInterval = interval;
-    }
-
-    public void setStale(boolean isStale) {
-        mValueText.getPaint().setAlpha(isStale ? 128 : 255);
-        invalidate();
-    }
-
-    public void setTrack(Track track){
-        if(mTrack != null){
-            mTrack.unregisterForTrackChanges(mTrackChangeListener);
-        }
-        mTrack = track;
-        if(mTrack != null){
-            mTrack.registerForTrackChanges(mTrackChangeListener);
-            // initialise values
-            mTrackChangeListener.onTrackChanged(mTrack);
-        }
-    }
-
-    public void setRoute(Route route){
-        mRoute = route;
-    }
-
-    public void setPoint(Point point){
-        mPoint = point;
-    }
 
     protected void setUnitsText(String unitsText){
         String text = null;
@@ -463,6 +457,9 @@ public class DashboardWidget extends FrameLayout
         }
         else {
             final Resources res = getResources();
+            if(res == null){
+                return;
+            }
             String[] values = null;
             switch (mWidgetType){
                 case WIDGET_SPEED:
@@ -528,54 +525,71 @@ public class DashboardWidget extends FrameLayout
     protected void setCategoryImage(int resourceId) {
         mCategoryImage.setImageResource(resourceId);
     }
+    public void setUpdateInterval(int interval){
+        if(interval != mUpdateInterval){
+            // TODO: hocus pocus
+        }
+        mUpdateInterval = interval;
+    }
+
+    public void resetUpdateInterval(){
+        final Resources res = getResources();
+        if (res != null) {
+            final String updateKey = res.getString(R.string.pref_display_freq_key);
+            final int interval = Integer.parseInt(mPreferences.getString(updateKey, GPS_UPDATE_INTERVAL + ""));
+            setUpdateInterval(interval);
+        }
+    }
+
+    public void setStale(boolean isStale) {
+        mValueText.getPaint().setAlpha(isStale ? 128 : 255);
+        invalidate();
+    }
+
+    public void setTrack(Track track){
+        if(mTrack != null){
+            mTrack.unregisterForTrackChanges(mTrackChangeListener);
+        }
+        mTrack = track;
+        if(mTrack != null){
+            mTrack.registerForTrackChanges(mTrackChangeListener);
+            // initialise values
+            mTrackChangeListener.onTrackChanged(mTrack);
+        }
+    }
+
+    public void setRoute(Route route){
+        mRoute = route;
+    }
+
+    public void setPoint(Point point){
+        mPoint = point;
+    }
 
     private double convertValue(double value){
-        Resources res = getResources();
-        TypedArray values = null;
         double factor = 1;
-        switch (mWidgetType){
-            case WIDGET_SPEED:
-            case WIDGET_SPEED_AVERAGE:
-                values = res.obtainTypedArray(R.array.unit_conversion_speed);
-                break;
-            case WIDGET_DISTANCE:
-                values = res.obtainTypedArray(R.array.unit_conversion_distance);
-                break;
-            case WIDGET_ACCURACY:
-            case WIDGET_ALTITUDE:
-            case WIDGET_ROUTE_OFFSET:
-                values = res.obtainTypedArray(R.array.unit_conversion_shortdistance);
-                break;
-        }
-        if(values != null && values.length() >= mUnitsType){
-            factor = values.getFloat(mUnitsType-1,1);
+        Resources res = getResources();
+        if (res != null) {
+            TypedArray values = null;
+            switch (mWidgetType){
+                case WIDGET_SPEED:
+                case WIDGET_SPEED_AVERAGE:
+                        values = res.obtainTypedArray(R.array.unit_conversion_speed);
+                    break;
+                case WIDGET_DISTANCE:
+                    values = res.obtainTypedArray(R.array.unit_conversion_distance);
+                    break;
+                case WIDGET_ACCURACY:
+                case WIDGET_ALTITUDE:
+                case WIDGET_ROUTE_OFFSET:
+                    values = res.obtainTypedArray(R.array.unit_conversion_shortdistance);
+                    break;
+            }
+            if(values != null && values.length() >= mUnitsType){
+                factor = values.getFloat(mUnitsType-1,1);
+            }
         }
         return value * factor;
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        int w = r - l;
-        int h = b - t;
-        //mValueText.setTextSize((float)h * 0.4f);
-
-        Shader textShader = new LinearGradient(0, 0, 0, h,
-                new int[]{Color.rgb(255,255,255),Color.rgb(128,128,128),Color.rgb(255,255,255)},
-                new float[]{0, 0.75f, 1}, Shader.TileMode.CLAMP);
-        mValueText.getPaint().setShader(textShader);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        final Resources res = getResources();
-        if(key.equals(res.getString(R.string.pref_units_key))){
-            if(mDefaultUnits){
-                setUnits(UNITS_DEFAULT);
-            }
-        }else if(key.equals(res.getString(R.string.pref_display_freq_key))){
-            resetUpdateInterval();
-        }
     }
 
     Track.OnTrackChangedListener mTrackChangeListener = new Track.OnTrackChangedListener() {
@@ -610,7 +624,7 @@ public class DashboardWidget extends FrameLayout
             case WIDGET_BATTERY_VOLT:
                 return new BatteryVoltageWidget(context);
             default:
-                return new DashboardWidget(context, widgetType);
+                return new DashboardWidget(context, widgetType, unitsType);
         }
     }
 
@@ -662,14 +676,16 @@ public class DashboardWidget extends FrameLayout
             mBroadcastReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
+                    if(Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())){
                         float value = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
                         setValue(value);
                     }
                 }
             };
-            final String unitsText = getResources().getString(R.string.units_battery_level);
-            setUnitsText(unitsText);
+            final Resources res = getResources();
+            if (res != null) {
+                setUnitsText(res.getString(R.string.units_battery_level));
+            }
             setCategoryImage(R.drawable.category_battery);
         }
     }
@@ -686,14 +702,16 @@ public class DashboardWidget extends FrameLayout
             mBroadcastReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
+                    if(Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())){
                         float value = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f;
                         setValue(value);
                     }
                 }
             };
-            final String unitsText = getResources().getString(R.string.units_battery_temp);
-            setUnitsText(unitsText);
+            final Resources res = getResources();
+            if (res != null) {
+                setUnitsText(res.getString(R.string.units_battery_level));
+            }
             setCategoryImage(R.drawable.category_battery);
         }
     }
@@ -710,14 +728,16 @@ public class DashboardWidget extends FrameLayout
             mBroadcastReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
+                    if(Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())){
                         float value = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) / 1000f;
                         setValue(value);
                     }
                 }
             };
-            final String unitsText = getResources().getString(R.string.units_battery_volt);
-            setUnitsText(unitsText);
+            final Resources res = getResources();
+            if (res != null) {
+                setUnitsText(res.getString(R.string.units_battery_level));
+            }
             setValueFormat("%.2f");
             setCategoryImage(R.drawable.category_battery);
         }
