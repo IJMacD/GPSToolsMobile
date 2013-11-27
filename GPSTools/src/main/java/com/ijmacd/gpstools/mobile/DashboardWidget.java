@@ -295,11 +295,14 @@ public class DashboardWidget extends FrameLayout
                     public void onGpsStatusChanged(int event) {
                         if(event == GpsStatus.GPS_EVENT_SATELLITE_STATUS){
                             GpsStatus status = mLocationManager.getGpsStatus(null);
-                            int count = 0;
-                            for(GpsSatellite sat : status.getSatellites()){
-                                count += sat.usedInFix() ? 1 : 0;
+                            int used = 0,
+                                total = 0;
+                            final Iterable<GpsSatellite> satellites = status.getSatellites();
+                            for(GpsSatellite sat : satellites){
+                                used += sat.usedInFix() ? 1 : 0;
+                                total += 1;
                             }
-                            setValue(count);
+                            setFormattedValue(used + "/" + total);
                         }
                     }
                 };
