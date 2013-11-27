@@ -34,7 +34,8 @@ public class DashboardWidget extends FrameLayout
 	public static final int WIDGET_ALTITUDE = 7;
 	public static final int WIDGET_ACCURACY = 8;
 	public static final int WIDGET_SATELLITES = 9;
-	public static final int WIDGET_MAP = 10;
+	public static final int WIDGET_GPSAGE = 10;
+	public static final int WIDGET_MAP = 11;
 	// Moving
 	public static final int WIDGET_SPEED = 16;
 	public static final int WIDGET_VAM = 17;
