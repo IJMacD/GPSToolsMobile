@@ -632,7 +632,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
     private void addWidget(int widgetType, int colSpan, int rowSpan, int unitsType) {
 
-        DashboardWidget widget = new DashboardWidget(this, widgetType, unitsType);
+        DashboardWidget widget = DashboardWidget.WidgetFactory(this, widgetType, unitsType);
 
         GridLayout.Spec colSpec = GridLayout.spec(GridLayout.UNDEFINED, colSpan);
         GridLayout.Spec rowSpec = GridLayout.spec(GridLayout.UNDEFINED, rowSpan);

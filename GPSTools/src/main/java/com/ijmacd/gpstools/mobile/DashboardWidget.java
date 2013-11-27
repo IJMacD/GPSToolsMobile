@@ -21,7 +21,9 @@ import java.util.Date;
 public class DashboardWidget extends FrameLayout
  implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-	// Stateless - GPS		0 - 31
+    public static final int WIDGET_UNKNOWN = 0;
+
+	// Stateless - GPS		1 - 31
 	// Static
 	public static final int WIDGET_GPSDATE = 1;
 	public static final int WIDGET_GPSTIME = 2;
@@ -79,7 +81,7 @@ public class DashboardWidget extends FrameLayout
     private static final int GPS_UPDATE_INTERVAL = 1000;
 
     private int mWidgetType;
-    private int mUnitsType;
+    private int mUnitsType = UNITS_DEFAULT;
     private boolean mDefaultUnits = true;
 
 	private TextView mValueText;
@@ -91,9 +93,6 @@ public class DashboardWidget extends FrameLayout
     private int mUpdateInterval;
 
     private Context mContext;
-
-    private BroadcastReceiver mReceiver;
-    private IntentFilter mBatteryFilter;
 
     private LocationManager mLocationManager;
 
@@ -111,38 +110,41 @@ public class DashboardWidget extends FrameLayout
     private Point mPoint;
 
     private static final boolean DEBUG = true;
+    private ImageView mCategoryImage;
 
     public DashboardWidget(Context context, AttributeSet attrs) {
-		super(context, attrs);
+        super(context, attrs);
 
         mContext = context;
-		
-		TypedArray attributes = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DashboardWidget, 0, 0);
-		try {
-            int widgetType = attributes.getInteger(R.styleable.DashboardWidget_widgetType, 0);
-            int unitsType = attributes.getInteger(R.styleable.DashboardWidget_units, UNITS_DEFAULT);
-            init(widgetType, unitsType);
-		}
-		finally {
-			attributes.recycle();
-		}
 
-	}
+        TypedArray attributes = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DashboardWidget, 0, 0);
+        try {
+            mWidgetType = attributes.getInteger(R.styleable.DashboardWidget_widgetType, 0);
+            mUnitsType = attributes.getInteger(R.styleable.DashboardWidget_units, UNITS_DEFAULT);
+            init();
+        }
+        finally {
+            attributes.recycle();
+        }
+
+    }
 
     public DashboardWidget(Context context, int widgetType) {
         super(context);
         mContext = context;
-        init(widgetType, UNITS_DEFAULT);
+        mWidgetType = widgetType;
+        init();
     }
 
     public DashboardWidget(Context context, int widgetType, int unitsType) {
         super(context);
         mContext = context;
-        init(widgetType, unitsType);
+        mWidgetType = widgetType;
+        mUnitsType = unitsType;
+        init();
     }
 
-    private void init(int widgetType, int unitsType){
-        mWidgetType = widgetType;
+    private void init(){
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_dashboard_item, this);
@@ -153,31 +155,29 @@ public class DashboardWidget extends FrameLayout
 
         mUnitsText = (TextView)findViewById(R.id.unit_text);
 
-        ImageView categoryImage = (ImageView)findViewById(R.id.category_image);
-        if(mWidgetType < 32){
+        mCategoryImage = (ImageView)findViewById(R.id.category_image);
+        if(mWidgetType == 0) {}
+        else if(mWidgetType < 32){
             // Category GPS
-            categoryImage.setImageResource(R.drawable.category_gps);
+            mCategoryImage.setImageResource(R.drawable.category_gps);
         }
         else if (mWidgetType < 64){
             // Category System
             if(mWidgetType < 35){
                 // System Date
             }
-            else if(mWidgetType < 38){
-                categoryImage.setImageResource(R.drawable.category_battery);
-            }
         }
         else if(mWidgetType < 96){
             // Category Track
-            categoryImage.setImageResource(R.drawable.category_track);
+            mCategoryImage.setImageResource(R.drawable.category_track);
         }
         else if(mWidgetType < 128){
             // Category Route
-            categoryImage.setImageResource(R.drawable.category_route);
+            mCategoryImage.setImageResource(R.drawable.category_route);
         }
         else if(mWidgetType < 160){
             // Category Point
-            categoryImage.setImageResource(R.drawable.category_point);
+            mCategoryImage.setImageResource(R.drawable.category_point);
         }
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -251,26 +251,6 @@ public class DashboardWidget extends FrameLayout
                     }
                 };
                 break;
-            case WIDGET_BATTERY_LEVEL:
-            case WIDGET_BATTERY_TEMP:
-            case WIDGET_BATTERY_VOLT:
-                mBatteryFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-                mReceiver = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
-                            float value = 0;
-                            if(mWidgetType == WIDGET_BATTERY_LEVEL)
-                                value = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-                            else if(mWidgetType == WIDGET_BATTERY_TEMP)
-                                value = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f;
-                            else if(mWidgetType == WIDGET_BATTERY_VOLT)
-                                value = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) / 1000f;
-                            setValue(value);
-                        }
-                    }
-                };
-                break;
             case WIDGET_DATE:
             case WIDGET_TIME:
                 mHandler = new Handler();
@@ -309,8 +289,8 @@ public class DashboardWidget extends FrameLayout
                 break;
         }
 
-        setValueFormat(widgetType);
-        setUnits(unitsType);
+        setValueFormat(null);
+        setUnits(mUnitsType);
 
         onResume();
     }
@@ -322,16 +302,10 @@ public class DashboardWidget extends FrameLayout
 
     public void onDestroy() {
         mContext = null;
-        mReceiver = null;
     }
 
     public void onPause(){
         switch (mWidgetType) {
-            case WIDGET_BATTERY_LEVEL:
-            case WIDGET_BATTERY_TEMP:
-            case WIDGET_BATTERY_VOLT:
-                mContext.unregisterReceiver(mReceiver);
-                break;
             case WIDGET_DATE:
             case WIDGET_TIME:
                 mHandler.removeCallbacks(mRunnable);
@@ -358,11 +332,6 @@ public class DashboardWidget extends FrameLayout
     public void onResume() {
 
         switch(mWidgetType)  {
-            case WIDGET_BATTERY_LEVEL:
-            case WIDGET_BATTERY_TEMP:
-            case WIDGET_BATTERY_VOLT:
-                mContext.registerReceiver(mReceiver, mBatteryFilter);
-                break;
             case WIDGET_DATE:
             case WIDGET_TIME:
                 mHandler.postDelayed(mRunnable, 0);
@@ -441,7 +410,7 @@ public class DashboardWidget extends FrameLayout
             mUnitsType = units;
         }
 
-        setUnitsText(mUnitsType);
+        setUnitsText(null);
         if(mValue != 0){
             setValue(mValue);
         }
@@ -487,71 +456,77 @@ public class DashboardWidget extends FrameLayout
         mPoint = point;
     }
 
-    private void setUnitsText(int units){
-        final Resources res = getResources();
-        String[] values = null;
+    protected void setUnitsText(String unitsText){
         String text = null;
-        switch (mWidgetType){
-            case WIDGET_SPEED:
-            case WIDGET_SPEED_AVERAGE:
-                values = res.getStringArray(R.array.units_speed);
-                break;
-            case WIDGET_DISTANCE:
-                values = res.getStringArray(R.array.units_distance);
-                break;
-            case WIDGET_ACCURACY:
-            case WIDGET_ALTITUDE:
-            case WIDGET_ROUTE_OFFSET:
-                values = res.getStringArray(R.array.units_shortdistance);
-                break;
-            case WIDGET_LATITUDE:
-                text = res.getString(R.string.units_lat);
-                break;
-            case WIDGET_LONGITUDE:
-                text = res.getString(R.string.units_lon);
-                break;
-            case WIDGET_HEADING:
-            case WIDGET_BEARING:
-                text = res.getString(R.string.units_heading);
-                break;
-            case WIDGET_BATTERY_LEVEL:
-                text = res.getString(R.string.units_battery_level);
-                break;
-            case WIDGET_BATTERY_TEMP:
-                text = res.getString(R.string.units_battery_temp);
-                break;
-            case WIDGET_BATTERY_VOLT:
-                text = res.getString(R.string.units_battery_volt);
-                break;
+        if(unitsText != null && unitsText.length() > 0){
+            text = unitsText;
         }
-        if(text == null && values != null && values.length >= units) {
-            text = values[units-1];
+        else {
+            final Resources res = getResources();
+            String[] values = null;
+            switch (mWidgetType){
+                case WIDGET_SPEED:
+                case WIDGET_SPEED_AVERAGE:
+                    values = res.getStringArray(R.array.units_speed);
+                    break;
+                case WIDGET_DISTANCE:
+                    values = res.getStringArray(R.array.units_distance);
+                    break;
+                case WIDGET_ACCURACY:
+                case WIDGET_ALTITUDE:
+                case WIDGET_ROUTE_OFFSET:
+                    values = res.getStringArray(R.array.units_shortdistance);
+                    break;
+                case WIDGET_LATITUDE:
+                    text = res.getString(R.string.units_lat);
+                    break;
+                case WIDGET_LONGITUDE:
+                    text = res.getString(R.string.units_lon);
+                    break;
+                case WIDGET_HEADING:
+                case WIDGET_BEARING:
+                    text = res.getString(R.string.units_heading);
+                    break;
+            }
+            if(text == null && values != null && values.length >= mUnitsType) {
+                text = values[mUnitsType-1];
+            }
         }
-        mUnitsText.setText(text);
+        if(text != null)
+            mUnitsText.setText(text);
     }
 
-    private void setValueFormat(int widgetType){
-        switch(widgetType){
-            case WIDGET_SPEED:
-            case WIDGET_SPEED_AVERAGE:
-                mValueFormat = "%.1f";
-                break;
-            case WIDGET_BATTERY_VOLT:
-                mValueFormat = "%.2f";
-                break;
-            case WIDGET_LATITUDE:
-                mValueFormat = "%05.3f";
-                break;
-            case WIDGET_LONGITUDE:
-                mValueFormat = "%06.3f";
-                break;
-            case WIDGET_DISTANCE:
-            case WIDGET_BATTERY_LEVEL:
-            case WIDGET_HEADING:
-            case WIDGET_BEARING:
-            default:
-                mValueFormat = "%.0f";
+    protected void setValueFormat(String format){
+        if(format != null && format.length() > 0){
+            mValueFormat = format;
         }
+        else {
+            switch(mWidgetType){
+                case WIDGET_SPEED:
+                case WIDGET_SPEED_AVERAGE:
+                    mValueFormat = "%.1f";
+                    break;
+                case WIDGET_LATITUDE:
+                    mValueFormat = "%05.3f";
+                    break;
+                case WIDGET_LONGITUDE:
+                    mValueFormat = "%06.3f";
+                    break;
+                case WIDGET_DISTANCE:
+                case WIDGET_HEADING:
+                case WIDGET_BEARING:
+                default:
+                    mValueFormat = "%.0f";
+            }
+        }
+    }
+
+    protected void setFormattedValue(String value){
+        mValueText.setText(value);
+    }
+
+    protected void setCategoryImage(int resourceId) {
+        mCategoryImage.setImageResource(resourceId);
     }
 
     private double convertValue(double value){
@@ -621,4 +596,130 @@ public class DashboardWidget extends FrameLayout
             }
         }
     };
+
+    public static DashboardWidget WidgetFactory(Context context, int widgetType) {
+        return WidgetFactory(context, widgetType, UNITS_DEFAULT);
+    }
+
+    public static DashboardWidget WidgetFactory(Context context, int widgetType, int unitsType) {
+        switch (widgetType){
+            case WIDGET_BATTERY_LEVEL:
+                return new BatteryLevelWidget(context);
+            case WIDGET_BATTERY_TEMP:
+                return new BatteryTemperatureWidget(context);
+            case WIDGET_BATTERY_VOLT:
+                return new BatteryVoltageWidget(context);
+            default:
+                return new DashboardWidget(context, widgetType);
+        }
+    }
+
+    abstract static class IntentWidget extends DashboardWidget {
+
+        private final Context mContext;
+        protected IntentFilter mIntentFilter;
+        protected BroadcastReceiver mBroadcastReceiver;
+
+        public IntentWidget(Context context, int widgetType) {
+            super(context, widgetType);
+            mContext = context;
+            init();
+            onResume();
+        }
+
+        protected abstract void init();
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            if(mContext != null)
+                mContext.registerReceiver(mBroadcastReceiver, mIntentFilter);
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            if(mContext != null)
+                mContext.unregisterReceiver(mBroadcastReceiver);
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            mBroadcastReceiver = null;
+        }
+    }
+
+    static class BatteryLevelWidget extends IntentWidget {
+
+        public BatteryLevelWidget(Context context) {
+            super(context, WIDGET_BATTERY_LEVEL);
+        }
+
+        @Override
+        protected void init() {
+            mIntentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            mBroadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
+                        float value = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                        setValue(value);
+                    }
+                }
+            };
+            final String unitsText = getResources().getString(R.string.units_battery_level);
+            setUnitsText(unitsText);
+            setCategoryImage(R.drawable.category_battery);
+        }
+    }
+
+    static class BatteryTemperatureWidget extends IntentWidget {
+
+        public BatteryTemperatureWidget(Context context) {
+            super(context, WIDGET_BATTERY_TEMP);
+        }
+
+        @Override
+        protected void init() {
+            mIntentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            mBroadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
+                        float value = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f;
+                        setValue(value);
+                    }
+                }
+            };
+            final String unitsText = getResources().getString(R.string.units_battery_temp);
+            setUnitsText(unitsText);
+            setCategoryImage(R.drawable.category_battery);
+        }
+    }
+
+    static class BatteryVoltageWidget extends IntentWidget {
+
+        public BatteryVoltageWidget(Context context) {
+            super(context, WIDGET_BATTERY_VOLT);
+        }
+
+        @Override
+        protected void init() {
+            mIntentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            mBroadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
+                        float value = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) / 1000f;
+                        setValue(value);
+                    }
+                }
+            };
+            final String unitsText = getResources().getString(R.string.units_battery_volt);
+            setUnitsText(unitsText);
+            setValueFormat("%.2f");
+            setCategoryImage(R.drawable.category_battery);
+        }
+    }
 }
