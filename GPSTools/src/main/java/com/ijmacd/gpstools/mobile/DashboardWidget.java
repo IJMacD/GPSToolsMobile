@@ -710,7 +710,7 @@ public class DashboardWidget extends FrameLayout
             };
             final Resources res = getResources();
             if (res != null) {
-                setUnitsText(res.getString(R.string.units_battery_level));
+                setUnitsText(res.getString(R.string.units_battery_temp));
             }
             setCategoryImage(R.drawable.category_battery);
         }
@@ -736,7 +736,7 @@ public class DashboardWidget extends FrameLayout
             };
             final Resources res = getResources();
             if (res != null) {
-                setUnitsText(res.getString(R.string.units_battery_level));
+                setUnitsText(res.getString(R.string.units_battery_volt));
             }
             setValueFormat("%.2f");
             setCategoryImage(R.drawable.category_battery);
