@@ -657,6 +657,8 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
         mWidgets.add(widget);
         mGridLayout.addView(widget);
+
+        widget.onResume();
     }
 
     private void deleteSelectedItems(){

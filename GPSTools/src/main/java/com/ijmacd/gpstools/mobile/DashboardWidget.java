@@ -15,6 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -102,9 +103,6 @@ public class DashboardWidget extends FrameLayout
     private GpsStatus.Listener mGpsStatusListener;
 
     private SharedPreferences mPreferences;
-
-    private Handler mHandler;
-    private Runnable mRunnable;
 
     private Track mTrack;
     private Route mRoute;
@@ -267,28 +265,6 @@ public class DashboardWidget extends FrameLayout
                     }
                 };
                 break;
-            case WIDGET_DATE:
-            case WIDGET_TIME:
-                mHandler = new Handler();
-                mRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        final Date now = new Date();
-                        SimpleDateFormat dateFormatter = null;
-                        switch (mWidgetType){
-                            case WIDGET_DATE:
-                                dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-                                break;
-                            case WIDGET_TIME:
-                                dateFormatter = new SimpleDateFormat("HH:mm:ss");
-                        }
-                        if (dateFormatter != null) {
-                            setFormattedValue(dateFormatter.format(now));
-                        }
-                        mHandler.postDelayed(this, DATE_UPDATE_INTERVAL);
-                    }
-                };
-                break;
             case WIDGET_SATELLITES:
                 mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
                 mGpsStatusListener = new GpsStatus.Listener() {
@@ -312,17 +288,11 @@ public class DashboardWidget extends FrameLayout
 
         setValueFormat(null);
         setUnits(mUnitsType);
-
-        onResume();
     }
 
     public void onResume() {
 
         switch(mWidgetType)  {
-            case WIDGET_DATE:
-            case WIDGET_TIME:
-                mHandler.postDelayed(mRunnable, 0);
-                break;
             case WIDGET_SATELLITES:
                 mLocationManager.addGpsStatusListener(mGpsStatusListener);
                 break;
@@ -348,10 +318,6 @@ public class DashboardWidget extends FrameLayout
 
     public void onPause(){
         switch (mWidgetType) {
-            case WIDGET_DATE:
-            case WIDGET_TIME:
-                mHandler.removeCallbacks(mRunnable);
-                break;
             case WIDGET_ACCURACY:
             case WIDGET_ALTITUDE:
             case WIDGET_HEADING:
@@ -627,6 +593,10 @@ public class DashboardWidget extends FrameLayout
                 return new BatteryTemperatureWidget(context);
             case WIDGET_BATTERY_VOLT:
                 return new BatteryVoltageWidget(context);
+            case WIDGET_DATE:
+            case WIDGET_TIME:
+            case WIDGET_DATETIME:
+                return new DateTimeWidget(context, widgetType);
             default:
                 return new DashboardWidget(context, widgetType, unitsType);
         }
@@ -744,6 +714,54 @@ public class DashboardWidget extends FrameLayout
             }
             setValueFormat("%.2f");
             setCategoryImage(R.drawable.category_battery);
+        }
+    }
+
+    static class DateTimeWidget extends DashboardWidget {
+
+        private final Context mContext;
+        private final Handler mHandler;
+        private final Runnable mRunnable;
+
+        public DateTimeWidget(Context context, final int widgetType){
+            super(context, widgetType);
+            mContext = context;
+            mHandler = new Handler();
+            mRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    final Date now = new Date();
+                    DateFormat dateFormatter = null;
+                    switch (widgetType){
+                        case WIDGET_DATE:
+                            dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+//                            dateFormatter = DateFormat.getDateInstance();
+                            break;
+                        case WIDGET_TIME:
+                            dateFormatter = new SimpleDateFormat("HH:mm:ss");
+//                            dateFormatter = DateFormat.getTimeInstance();
+                            break;
+                        case WIDGET_DATETIME:
+                            dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
+//                            dateFormatter = DateFormat.getDateTimeInstance();
+                            break;
+                    }
+                    if (dateFormatter != null) {
+                        setFormattedValue(dateFormatter.format(now));
+                    }
+                    mHandler.postDelayed(this, DATE_UPDATE_INTERVAL);
+                }
+            };
+        }
+
+        @Override
+        public void onResume(){
+            mHandler.postDelayed(mRunnable, 0);
+        }
+
+        @Override
+        public void onPause(){
+            mHandler.removeCallbacks(mRunnable);
         }
     }
 }
