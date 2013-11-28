@@ -177,7 +177,6 @@ public class DashboardWidget extends FrameLayout
         if(mWidgetType == 0) {}
         else if(mWidgetType < 32){
             // Category GPS
-            mCategoryImage.setImageResource(R.drawable.category_gps);
         }
         else if (mWidgetType < 64){
             // Category System
@@ -201,70 +200,6 @@ public class DashboardWidget extends FrameLayout
         resetUpdateInterval();
 
         switch (mWidgetType){
-            case WIDGET_ACCURACY:
-            case WIDGET_ALTITUDE:
-            case WIDGET_HEADING:
-            case WIDGET_LATITUDE:
-            case WIDGET_LONGITUDE:
-            case WIDGET_SPEED:
-            case WIDGET_GPSDATE:
-            case WIDGET_GPSTIME:
-                mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-                mLocationListener = new LocationListener() {
-//                    private long mLastFix;
-                    @Override
-                    public void onLocationChanged(Location location) {
-//                        should not be here, should be in gpsstatus.listener or in a timer
-//                        final long currentTime = SystemClock.elapsedRealtime();
-//                        setStale(mLastFix > 0 && (currentTime - mLastFix) > GPS_UPDATE_INTERVAL * 2);
-//                        mLastFix = currentTime;
-                        Date fixDate;
-                        SimpleDateFormat dateFormatter;
-                        switch (mWidgetType){
-                            case WIDGET_SPEED:
-                                setValue(location.getSpeed());
-                                break;
-                            case WIDGET_ACCURACY:
-                                setValue(location.getAccuracy());
-                                break;
-                            case WIDGET_ALTITUDE:
-                                setValue(location.getAltitude());
-                                break;
-                            case WIDGET_HEADING:
-                                setValue(location.getBearing());
-                                break;
-                            case WIDGET_LATITUDE:
-                                setValue(location.getLatitude());
-                                break;
-                            case WIDGET_LONGITUDE:
-                                setValue(location.getLongitude());
-                                break;
-                            case WIDGET_GPSTIME:
-                                fixDate = new Date(location.getTime());
-                                dateFormatter = new SimpleDateFormat("HH:mm:ss");
-                                mValueText.setText(dateFormatter.format(fixDate));
-                                break;
-                            case WIDGET_GPSDATE:
-                                fixDate = new Date(location.getTime());
-                                dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-                                mValueText.setText(dateFormatter.format(fixDate));
-                                break;
-                        }
-                    }
-
-                    @Override
-                    public void onStatusChanged(String s, int i, Bundle bundle) {
-                    }
-
-                    @Override
-                    public void onProviderEnabled(String s) {
-                    }
-
-                    @Override
-                    public void onProviderDisabled(String s) {
-                    }
-                };
-                break;
             case WIDGET_SATELLITES:
                 mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
                 mGpsStatusListener = new GpsStatus.Listener() {
@@ -296,16 +231,6 @@ public class DashboardWidget extends FrameLayout
             case WIDGET_SATELLITES:
                 mLocationManager.addGpsStatusListener(mGpsStatusListener);
                 break;
-            case WIDGET_ACCURACY:
-            case WIDGET_ALTITUDE:
-            case WIDGET_HEADING:
-            case WIDGET_LATITUDE:
-            case WIDGET_LONGITUDE:
-            case WIDGET_SPEED:
-            case WIDGET_GPSDATE:
-            case WIDGET_GPSTIME:
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        GPS_UPDATE_INTERVAL, 0, mLocationListener);
         }
 
         // Preferences might have changed while we were paused
@@ -318,16 +243,6 @@ public class DashboardWidget extends FrameLayout
 
     public void onPause(){
         switch (mWidgetType) {
-            case WIDGET_ACCURACY:
-            case WIDGET_ALTITUDE:
-            case WIDGET_HEADING:
-            case WIDGET_LATITUDE:
-            case WIDGET_LONGITUDE:
-            case WIDGET_SPEED:
-            case WIDGET_GPSDATE:
-            case WIDGET_GPSTIME:
-                mLocationManager.removeUpdates(mLocationListener);
-                break;
             case WIDGET_SATELLITES:
                 mLocationManager.removeGpsStatusListener(mGpsStatusListener);
                 break;
@@ -597,8 +512,108 @@ public class DashboardWidget extends FrameLayout
             case WIDGET_TIME:
             case WIDGET_DATETIME:
                 return new DateTimeWidget(context, widgetType);
+            case WIDGET_ACCURACY:
+            case WIDGET_ALTITUDE:
+            case WIDGET_HEADING:
+            case WIDGET_LATITUDE:
+            case WIDGET_LONGITUDE:
+            case WIDGET_SPEED:
+            case WIDGET_GPSDATE:
+            case WIDGET_GPSTIME:
+            case WIDGET_GPSDATETIME:
+                return new GPSLocationWidget(context, widgetType);
             default:
                 return new DashboardWidget(context, widgetType, unitsType);
+        }
+    }
+
+    static class GPSLocationWidget extends DashboardWidget{
+        private final Context mContext;
+        private final LocationManager mLocationManager;
+        private final LocationListener mLocationListener;
+
+        public GPSLocationWidget(Context context, final int widgetType){
+            super(context, widgetType);
+            mContext = context;
+
+            final DateFormat dateFormat;
+            switch (widgetType){
+                case WIDGET_GPSDATE:
+//                    dateFormat = DateFormat.getDateInstance();
+                    dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    break;
+                case WIDGET_GPSTIME:
+//                    dateFormat = DateFormat.getTimeInstance();
+                    dateFormat = new SimpleDateFormat("HH:mm:ss");
+                    break;
+                case WIDGET_GPSDATETIME:
+//                    dateFormat = DateFormat.getDateTimeInstance();
+                    dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
+                    break;
+                default:
+                    dateFormat = null;
+            }
+
+            mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+            mLocationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    Date fixDate;
+                    switch (widgetType){
+                        case WIDGET_SPEED:
+                            setValue(location.getSpeed());
+                            break;
+                        case WIDGET_ACCURACY:
+                            setValue(location.getAccuracy());
+                            break;
+                        case WIDGET_ALTITUDE:
+                            setValue(location.getAltitude());
+                            break;
+                        case WIDGET_HEADING:
+                            setValue(location.getBearing());
+                            break;
+                        case WIDGET_LATITUDE:
+                            setValue(location.getLatitude());
+                            break;
+                        case WIDGET_LONGITUDE:
+                            setValue(location.getLongitude());
+                            break;
+                        case WIDGET_GPSDATE:
+                        case WIDGET_GPSTIME:
+                        case WIDGET_GPSDATETIME:
+                            fixDate = new Date(location.getTime());
+                            setFormattedValue(dateFormat.format(fixDate));
+                            break;
+                    }
+                }
+
+                @Override
+                public void onStatusChanged(String s, int i, Bundle bundle) {
+                }
+
+                @Override
+                public void onProviderEnabled(String s) {
+                }
+
+                @Override
+                public void onProviderDisabled(String s) {
+                }
+            };
+
+            setCategoryImage(R.drawable.category_gps);
+        }
+
+        @Override
+        public void onResume(){
+            super.onResume();
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    GPS_UPDATE_INTERVAL, 0, mLocationListener);
+        }
+
+        @Override
+        public void onPause(){
+            super.onPause();
+            mLocationManager.removeUpdates(mLocationListener);
         }
     }
 
@@ -756,11 +771,13 @@ public class DashboardWidget extends FrameLayout
 
         @Override
         public void onResume(){
+            super.onResume();
             mHandler.postDelayed(mRunnable, 0);
         }
 
         @Override
         public void onPause(){
+            super.onPause();
             mHandler.removeCallbacks(mRunnable);
         }
     }
