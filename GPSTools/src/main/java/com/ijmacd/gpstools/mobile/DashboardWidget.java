@@ -96,12 +96,6 @@ public class DashboardWidget extends FrameLayout
 
     private Context mContext;
 
-    private LocationManager mLocationManager;
-
-    private LocationListener mLocationListener;
-
-    private GpsStatus.Listener mGpsStatusListener;
-
     private SharedPreferences mPreferences;
 
     private Track mTrack;
@@ -174,16 +168,7 @@ public class DashboardWidget extends FrameLayout
 
         mValueText.getPaint().setShader(mTextShader);
 
-        if(mWidgetType == 0) {}
-        else if(mWidgetType < 32){
-            // Category GPS
-        }
-        else if (mWidgetType < 64){
-            // Category System
-            if (mWidgetType < 35) {
-                // System Date
-            }
-        }
+        if (mWidgetType < 64){}
         else if(mWidgetType < 96){
             // Category Track
             mCategoryImage.setImageResource(R.drawable.category_track);
@@ -199,39 +184,12 @@ public class DashboardWidget extends FrameLayout
 
         resetUpdateInterval();
 
-        switch (mWidgetType){
-            case WIDGET_SATELLITES:
-                mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-                mGpsStatusListener = new GpsStatus.Listener() {
-                    @Override
-                    public void onGpsStatusChanged(int event) {
-                        if(event == GpsStatus.GPS_EVENT_SATELLITE_STATUS){
-                            GpsStatus status = mLocationManager.getGpsStatus(null);
-                            int used = 0,
-                                total = 0;
-                            final Iterable<GpsSatellite> satellites = status.getSatellites();
-                            for(GpsSatellite sat : satellites){
-                                used += sat.usedInFix() ? 1 : 0;
-                                total += 1;
-                            }
-                            setFormattedValue(used + "/" + total);
-                        }
-                    }
-                };
-                break;
-        }
-
         setValueFormat(null);
+
         setUnits(mUnitsType);
     }
 
     public void onResume() {
-
-        switch(mWidgetType)  {
-            case WIDGET_SATELLITES:
-                mLocationManager.addGpsStatusListener(mGpsStatusListener);
-                break;
-        }
 
         // Preferences might have changed while we were paused
         if(mDefaultUnits){
@@ -242,13 +200,6 @@ public class DashboardWidget extends FrameLayout
     }
 
     public void onPause(){
-        switch (mWidgetType) {
-            case WIDGET_SATELLITES:
-                mLocationManager.removeGpsStatusListener(mGpsStatusListener);
-                break;
-        }
-
-
         mPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
@@ -522,6 +473,8 @@ public class DashboardWidget extends FrameLayout
             case WIDGET_GPSTIME:
             case WIDGET_GPSDATETIME:
                 return new GPSLocationWidget(context, widgetType);
+            case WIDGET_SATELLITES:
+                return new GPSStatusWidget(context);
             default:
                 return new DashboardWidget(context, widgetType, unitsType);
         }
@@ -614,6 +567,53 @@ public class DashboardWidget extends FrameLayout
         public void onPause(){
             super.onPause();
             mLocationManager.removeUpdates(mLocationListener);
+        }
+    }
+
+    static class GPSStatusWidget extends DashboardWidget{
+        private final Context mContext;
+        private final LocationManager mLocationManager;
+        private final GpsStatus.Listener mGpsStatusListener;
+
+        public GPSStatusWidget(Context context){
+            super(context, WIDGET_SATELLITES);
+
+            mContext = context;
+
+            mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+            mGpsStatusListener = new GpsStatus.Listener() {
+                GpsStatus mStatus;
+                @Override
+                public void onGpsStatusChanged(int event) {
+                    if(event == GpsStatus.GPS_EVENT_SATELLITE_STATUS){
+                        mStatus = mLocationManager.getGpsStatus(mStatus);
+                        int used = 0,
+                                total = 0;
+                        final Iterable<GpsSatellite> satellites = mStatus.getSatellites();
+                        for(GpsSatellite sat : satellites){
+                            used += sat.usedInFix() ? 1 : 0;
+                            total += 1;
+                        }
+                        setFormattedValue(used + "/" + total);
+                    }
+                }
+            };
+
+            setCategoryImage(R.drawable.category_gps);
+        }
+
+        @Override
+        public void onResume(){
+            super.onResume();
+
+            mLocationManager.addGpsStatusListener(mGpsStatusListener);
+        }
+
+        @Override
+        public void onPause(){
+            super.onPause();
+
+            mLocationManager.removeGpsStatusListener(mGpsStatusListener);
         }
     }
 
