@@ -3,6 +3,7 @@ package com.ijmacd.gpstools.mobile;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -43,7 +44,8 @@ public class TrackListActivity extends ActionBarActivity implements ActionBar.On
                         DatabaseHelper.NAME_COLUMN,
                         DatabaseHelper.DATE_COLUMN,
                         DatabaseHelper.DISTANCE_COLUMN,
-                        DatabaseHelper.DURATION_COLUMN},
+                        DatabaseHelper.DURATION_COLUMN,
+                        DatabaseHelper.COMPLETE_COLUMN},
                 null, null,
                 null, null,
                 DatabaseHelper.DATE_COLUMN + " DESC"
@@ -54,12 +56,14 @@ public class TrackListActivity extends ActionBarActivity implements ActionBar.On
                 new String[]{
                         DatabaseHelper.NAME_COLUMN,
                         DatabaseHelper.DISTANCE_COLUMN,
-                        DatabaseHelper.DURATION_COLUMN
+                        DatabaseHelper.DURATION_COLUMN,
+                        DatabaseHelper.COMPLETE_COLUMN
                 },
                 new int[]{
                         R.id.name_text,
                         R.id.distance_text,
-                        R.id.duration_text
+                        R.id.duration_text,
+                        R.id.error_text
                 });
 
         mAdapter.notifyDataSetInvalidated();
@@ -81,6 +85,19 @@ public class TrackListActivity extends ActionBarActivity implements ActionBar.On
                 if(columnIndex == index){
                     final int t = (int)cursor.getFloat(columnIndex);
                     textView.setText(String.format("%d:%02d:%02d", t/3600, (t%3600)/60, t%60));
+                    return true;
+                }
+
+                index = cursor.getColumnIndex(DatabaseHelper.COMPLETE_COLUMN);
+                if(columnIndex == index){
+                    final int complete = cursor.getInt(columnIndex);
+                    if(complete == 0){
+                        textView.setText("Incomplete");
+                        textView.setTextColor(Color.rgb(255,128,0));
+                    }
+                    else {
+                        textView.setText("");
+                    }
                     return true;
                 }
 
