@@ -165,7 +165,7 @@ public class TrackService extends Service {
         mLocationManager.removeUpdates(mLocationListener);
 
         if(mTrack != null)
-            mTrack.save();
+            mTrack.close();
 
     }
 

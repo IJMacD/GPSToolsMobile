@@ -3,6 +3,7 @@ package com.ijmacd.gpstools.mobile;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,7 +14,8 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "GPSTools.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
+
     public static final String ID_COLUMN = "_id";
     public static final String TYPE_COLUMN = "type";
     public static final String ORDER_COLUMN = "child";
@@ -34,6 +36,9 @@ class DatabaseHelper extends SQLiteOpenHelper {
     public static final String ACCURACY_COLUMN = "accuracy";
     public static final String SPEED_COLUMN = "speed";
     public static final String HEADING_COLUMN = "heading";
+    public static final String COMPLETE_COLUMN = "complete";
+
+    private static final String LOG_TAG = "GPSTools";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -65,15 +70,22 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 ALTITUDE_COLUMN + " REAL, " +
                 ACCURACY_COLUMN + " REAL, " +
                 SPEED_COLUMN + " REAL, " +
-                HEADING_COLUMN + " INTEGER" +
+                HEADING_COLUMN + " INTEGER, " +
+                COMPLETE_COLUMN + " INTEGER" +
                 ");");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + WIDGET_TABLE_NAME + ", " +
-                TRACK_TABLE_NAME + ", " +
-                TRACKPOINT_TABLE_NAME);
-        onCreate(db);
+        if(oldVersion < 2){
+            db.execSQL("ALTER TABLE " + TRACK_TABLE_NAME + " ADD COLUMN " + COMPLETE_COLUMN + " INTEGER");
+            db.execSQL("UPDATE " + TRACK_TABLE_NAME + " SET " + COMPLETE_COLUMN + " = 1");
+            Log.v(LOG_TAG, "Updated database version: " + oldVersion + " -> " + newVersion);
+        }else {
+            db.execSQL("DROP TABLE IF EXISTS " + WIDGET_TABLE_NAME + ", " +
+                    TRACK_TABLE_NAME + ", " +
+                    TRACKPOINT_TABLE_NAME);
+            onCreate(db);
+        }
     }
 }

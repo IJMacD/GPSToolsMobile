@@ -32,12 +32,13 @@ public class Track {
     private Point mLastPoint;
 
     private static final int BUFFER_POINTS = 0;
+    private int mComplete = 0;
 
     public Track(Context context){
         // I've heard this helps mitigate leaking activity contexts
         mContext = context.getApplicationContext();
 
-        mDatabase = new DatabaseHelper(context);
+        mDatabase = new DatabaseHelper(mContext);
 
         mStartTime = System.currentTimeMillis();
 
@@ -70,6 +71,12 @@ public class Track {
 
     public void save() {
         commitPointsToDatabase();
+    }
+
+    public void close() {
+        commitPointsToDatabase();
+        mComplete = 1;
+        updateDatabaseTrack(null);
     }
 
     /**
@@ -120,6 +127,7 @@ public class Track {
         cv.put(DatabaseHelper.NAME_COLUMN, getName());
         cv.put(DatabaseHelper.DISTANCE_COLUMN, mDistance);
         cv.put(DatabaseHelper.DURATION_COLUMN, getDuration());
+        cv.put(DatabaseHelper.COMPLETE_COLUMN, mComplete);
         db.update(DatabaseHelper.TRACK_TABLE_NAME,
                 cv,
                 DatabaseHelper.ID_COLUMN + " = ?",
