@@ -177,10 +177,6 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         super.onDestroy();
         Log.d(LOG_TAG, "onDestroy()");
         doUnbindService();
-        if(isFinishing()){
-            Log.d(LOG_TAG, "isFinishing");
-            stopService(new Intent(this, TrackService.class));
-        }
     }
 
     @Override
