@@ -54,7 +54,7 @@ public class TrackDetailActivity extends ActionBarActivity {
 
         if(trackId > 0){
             try{
-                mTrack = Track.getTrack(trackId, this);
+                mTrack = Track.getTrack(this, trackId);
                 mNameText.setText(mTrack.getName());
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 mStartText.setText(formatter.format(mTrack.getStartDate()));

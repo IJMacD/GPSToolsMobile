@@ -214,7 +214,7 @@ public class Track {
         void onTrackChanged(Track target);
     }
 
-    public static Track getTrack(long trackId, Context context) {
+    public static Track getTrack(Context context, long trackId) {
         DatabaseHelper helper = new DatabaseHelper(context);
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor trackCursor = db.query(
