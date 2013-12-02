@@ -27,7 +27,6 @@ public class TrackService extends Service {
 
     private int mUpdateInterval;
 
-
     private Track mTrack;
 
     // Unique Identification Number for the Notification.
@@ -39,6 +38,8 @@ public class TrackService extends Service {
     private static final float MIN_DISTANCE = 0;
 
     private boolean mRecording;
+
+    final private TrackService self = this;
 
 
     @Override
@@ -56,7 +57,20 @@ public class TrackService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(LOG_TAG, "Received start id " + startId + ": " + intent);
+        Log.i(LOG_TAG, "Received start id " + startId +
+                ((flags & START_FLAG_REDELIVERY) > 0 ? " (REDELIVERY)" : "") +
+                ((flags & START_FLAG_RETRY) > 0 ? " (RETRY)" : "") +
+                ": " + intent);
+
+        // I think we're recovering
+        // Check the database for unfinished tracks
+        if(intent == null){
+            Track track = Track.getLatestTrack(this);
+            if(!track.isComplete()){
+                Log.i(LOG_TAG, "Recovered incomplete track");
+                startLogging(track);
+            }
+        }
 
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -97,10 +111,13 @@ public class TrackService extends Service {
      */
     public class LocalBinder extends Binder {
         TrackService getService() {
-            return TrackService.this;
+            return self;
         }
         Track getTrack(){
             return mTrack;
+        }
+        boolean isRecording(){
+            return mRecording;
         }
     }
 
@@ -133,13 +150,18 @@ public class TrackService extends Service {
     }
 
     public Track startLogging(){
+        return startLogging(new Track(this));
+    }
+
+    private Track startLogging(Track track) {
+
         Log.d(LOG_TAG, "startLogging()");
 
         if(mTrack != null){
             mTrack.save();
         }
 
-        mTrack = new Track(this);
+        mTrack = track;
 
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                 MIN_TIME, MIN_DISTANCE,
@@ -151,7 +173,6 @@ public class TrackService extends Service {
         showNotification();
 
         return mTrack;
-
     }
 
     public void stopLogging(){
