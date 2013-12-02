@@ -1,26 +1,19 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".Dashboard"
-    tools:ignore="MergeRootFrame" >
+    android:layout_height="match_parent" >
 
-    <ScrollView
+    <android.support.v7.widget.GridLayout
+        android:id="@+id/grid_dashboard"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/scrollView" >
-
-        <android.support.v7.widget.GridLayout
-            android:id="@+id/grid_dashboard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/activity_vertical_margin_thin"
-            android:paddingLeft="@dimen/activity_horizontal_margin_thin"
-            android:paddingRight="@dimen/activity_horizontal_margin_thin"
-            android:paddingTop="@dimen/activity_vertical_margin_thin"
-            android:columnCount="2"
-            tools:context=".DashboardActivity"
-            android:clipChildren="false" />
-    </ScrollView>
-</FrameLayout>
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/activity_vertical_margin_thin"
+        android:paddingLeft="@dimen/activity_horizontal_margin_thin"
+        android:paddingRight="@dimen/activity_horizontal_margin_thin"
+        android:paddingTop="@dimen/activity_vertical_margin_thin"
+        app:columnCount="@integer/dashboard_columns"
+        tools:context=".DashboardActivity"
+        android:clipChildren="false" />
+</ScrollView>

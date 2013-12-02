@@ -107,6 +107,10 @@ public class DashboardWidget extends FrameLayout
     private Shader mTextShader;
     private Matrix mTextShaderMatrix;
 
+    public DashboardWidget(Context context){
+        super(context);
+    }
+
     public DashboardWidget(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -127,6 +131,10 @@ public class DashboardWidget extends FrameLayout
             }
         }
 
+    }
+
+    public DashboardWidget(Context context, AttributeSet attributeSet, int defStyle){
+        super(context, attributeSet, defStyle);
     }
 
     public DashboardWidget(Context context, int widgetType) {
@@ -159,7 +167,9 @@ public class DashboardWidget extends FrameLayout
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-        mPreferences.registerOnSharedPreferenceChangeListener(this);
+        if(mPreferences != null){
+            mPreferences.registerOnSharedPreferenceChangeListener(this);
+        }
 
         mTextShader = new LinearGradient(0, 0, 0, 1,
                 new int[]{Color.rgb(255,255,255),Color.rgb(128,128,128),Color.rgb(255,255,255)},
@@ -196,11 +206,15 @@ public class DashboardWidget extends FrameLayout
             setUnits(UNITS_DEFAULT);
         }
         resetUpdateInterval();
-        mPreferences.registerOnSharedPreferenceChangeListener(this);
+        if(mPreferences != null){
+            mPreferences.registerOnSharedPreferenceChangeListener(this);
+        }
     }
 
     public void onPause(){
-        mPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        if(mPreferences != null){
+            mPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        }
     }
 
     public void onDestroy() {
@@ -269,7 +283,7 @@ public class DashboardWidget extends FrameLayout
         if(units == UNITS_DEFAULT){
             mDefaultUnits = true;
             final Resources res = getResources();
-            if (res != null) {
+            if (res != null && mPreferences != null) {
                 mUnitsType = Integer.parseInt(mPreferences.getString(
                         res.getString(R.string.pref_units_key),
                         res.getInteger(R.integer.default_unit) + ""));
@@ -370,7 +384,7 @@ public class DashboardWidget extends FrameLayout
 
     public void resetUpdateInterval(){
         final Resources res = getResources();
-        if (res != null) {
+        if (res != null && mPreferences != null) {
             final String updateKey = res.getString(R.string.pref_display_freq_key);
             final int interval = Integer.parseInt(mPreferences.getString(updateKey, GPS_UPDATE_INTERVAL + ""));
             setUpdateInterval(interval);

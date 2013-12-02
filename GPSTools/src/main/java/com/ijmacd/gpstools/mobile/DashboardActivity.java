@@ -136,16 +136,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         android.graphics.Point size = new android.graphics.Point();
         getWindowManager().getDefaultDisplay().getSize(size);
         int screenWidth = size.x - 16;
-        int mColumnCount,
-            intendedColumnCount;
-        mColumnCount = mGridLayout.getColumnCount();
-        if(mColumnCount == 0){
-            // What's going on here? GridLayout bug?
-            intendedColumnCount = getResources().getInteger(R.integer.dashboard_columns);
-            mColumnCount = intendedColumnCount;
-            mGridLayout.setColumnCount(mColumnCount);
-        }
-        mWidgetWidth = screenWidth / mColumnCount;
+        mWidgetWidth = screenWidth / mGridLayout.getColumnCount();
         mWidgetHeight = (int)(90f * getResources().getDisplayMetrics().density);
 
         //mCurrentTrack = new Track(this);
