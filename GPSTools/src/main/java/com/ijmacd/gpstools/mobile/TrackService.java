@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.widget.Toast;
 import com.ijmacd.gpstools.mobile.R;
@@ -108,9 +109,10 @@ public class TrackService extends Service {
      */
     private void showNotification() {
 
-        // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, DashboardActivity.class), 0);
+        Intent intent = new Intent(this, DashboardActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(DashboardActivity.class);
+        stackBuilder.addNextIntent(intent);
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
@@ -118,7 +120,7 @@ public class TrackService extends Service {
         builder.setContentText(getText(R.string.local_service_started));
         builder.setContentTitle(getText(R.string.local_service_label));
         builder.setOngoing(true);
-        builder.setContentIntent(contentIntent);
+        builder.setContentIntent(stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT));
 
         final Notification notification = builder.build();
 

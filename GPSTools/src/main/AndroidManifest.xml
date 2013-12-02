@@ -16,8 +16,9 @@
         android:label="@string/app_name"
         android:theme="@style/Theme.Gpstools" >
         <activity
-            android:name="com.ijmacd.gpstools.mobile.DashboardActivity"
-            android:label="@string/app_name" >
+            android:name=".DashboardActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,24 +26,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.ijmacd.gpstools.mobile.TrackListActivity"
+            android:name=".TrackListActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name="com.ijmacd.gpstools.mobile.TrackDetailActivity"
+            android:name=".TrackDetailActivity"
             android:label="@string/app_name"
-            android:parentActivityName="com.ijmacd.gpstools.mobile.TrackListActivity" >
+            android:parentActivityName=".TrackListActivity" >
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ijmacd.gpstools.mobile.TrackListActivity" />
+                android:value=".TrackListActivity" />
         </activity>
         <activity
-            android:name="com.ijmacd.gpstools.mobile.SettingsActivity"
+            android:name=".SettingsActivity"
             android:label="@string/app_name" >
         </activity>
         <service
-            android:name="com.ijmacd.gpstools.mobile.TrackService"  >
+            android:name=".TrackService"  >
         </service>
     </application>
 
