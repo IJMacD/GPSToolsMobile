@@ -1,6 +1,7 @@
 package com.ijmacd.gpstools.mobile;
 
 import android.app.Dialog;
+import android.app.TaskStackBuilder;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -226,7 +227,10 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
                     mTrackService.stopLogging();
                     Intent intent = new Intent(this, TrackDetailActivity.class);
                     intent.putExtra(EXTRA_TRACK, mCurrentTrack.getID());
-                    startActivity(intent);
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+                    stackBuilder.addParentStack(TrackDetailActivity.class);
+                    stackBuilder.addNextIntent(intent);
+                    stackBuilder.startActivities();
                 }
                 else {
                     mCurrentTrack = mTrackService.startLogging();
