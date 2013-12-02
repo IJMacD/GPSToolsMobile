@@ -31,12 +31,6 @@
         <item name="actionModeBackground">@drawable/cab_background_top_gpstools</item>
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_gpstools</item>
         <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Gpstools</item>
-        <item name="actionButtonStyle">@style/ActionButtonStyle</item>
-    </style>
-
-    <style name="ActionButtonStyle" parent="@style/Widget.AppCompat.ActionButton">
-        <item name="android:minWidth">28dip</item>
-        <item name="android:padding">4dip</item>
     </style>
 
     <style name="ActionBar.Solid.Gpstools" parent="@style/Widget.AppCompat.ActionBar.Solid">

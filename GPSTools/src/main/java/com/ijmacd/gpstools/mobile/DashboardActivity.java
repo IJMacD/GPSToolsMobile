@@ -55,8 +55,6 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
      */
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
-    private final String[] navigationLabels = new String[]{ "Dashboard", "Tracks" };
-
     private TrackService mTrackService;
 
     private Track mCurrentTrack;
@@ -122,15 +120,11 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(), R.array.navigation_labels, R.layout.spinner_view);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         // Set up the dropdown list navigation in the action bar.
-        actionBar.setListNavigationCallbacks(
-                // Specify a SpinnerAdapter to populate the dropdown list.
-                new ArrayAdapter<String>(
-                        actionBar.getThemedContext(),
-                        android.R.layout.simple_list_item_1,
-                        android.R.id.text1,
-                        navigationLabels),
-                this);
+        actionBar.setListNavigationCallbacks(adapter, this);
 
         setTitle("");
 

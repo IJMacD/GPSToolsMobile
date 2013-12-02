@@ -22,4 +22,8 @@
         <item>1800000</item>
         <item>3600000</item>
     </string-array>
+    <string-array name="navigation_labels">
+        <item>Dashboard</item>
+        <item>Tracks</item>
+    </string-array>
 </resources>

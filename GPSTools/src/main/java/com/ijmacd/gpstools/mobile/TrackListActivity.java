@@ -23,7 +23,7 @@ import android.widget.*;
  * To change this template use File | Settings | File Templates.
  */
 public class TrackListActivity extends ActionBarActivity implements ActionBar.OnNavigationListener {
-    private final String[] labels = new String[]{"Dashboard","Tracks"};
+
     private SimpleCursorAdapter mAdapter;
     private ActionMode mActionMode;
 
@@ -146,9 +146,13 @@ public class TrackListActivity extends ActionBarActivity implements ActionBar.On
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        ArrayAdapter<String> nav = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, labels);
-        nav.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        actionBar.setListNavigationCallbacks(nav, this);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(), R.array.navigation_labels, R.layout.spinner_view);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Set up the dropdown list navigation in the action bar.
+        actionBar.setListNavigationCallbacks(adapter, this);
+
         setTitle("");
     }
     @Override
