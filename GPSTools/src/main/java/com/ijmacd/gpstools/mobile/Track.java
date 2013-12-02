@@ -107,6 +107,10 @@ public class Track {
         return new Date();
     }
 
+    public boolean isComplete(){
+        return mComplete > 0;
+    }
+
 
     private void createDatabaseTrack(){
         if(mStartTime == 0){
@@ -219,18 +223,47 @@ public class Track {
                         DatabaseHelper.NAME_COLUMN,
                         DatabaseHelper.DATE_COLUMN,
                         DatabaseHelper.DISTANCE_COLUMN,
-                        DatabaseHelper.DURATION_COLUMN},
+                        DatabaseHelper.DURATION_COLUMN,
+                        DatabaseHelper.COMPLETE_COLUMN
+                },
                 DatabaseHelper.ID_COLUMN + " = ?",
                 new String[]{
                         String.valueOf(trackId)
                 },
                 null, null, null);
-        if(trackCursor.moveToFirst()){
+
+        return cursorToTrack(context, helper, trackCursor);
+
+    }
+
+    public static Track getLatestTrack(Context context) {
+        DatabaseHelper helper = new DatabaseHelper(context);
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor trackCursor = db.query(
+                DatabaseHelper.TRACK_TABLE_NAME,
+                new String[]{
+                        DatabaseHelper.ID_COLUMN,
+                        DatabaseHelper.NAME_COLUMN,
+                        DatabaseHelper.DATE_COLUMN,
+                        DatabaseHelper.DISTANCE_COLUMN,
+                        DatabaseHelper.DURATION_COLUMN,
+                        DatabaseHelper.COMPLETE_COLUMN
+                },
+                null, null,
+                null, null, DatabaseHelper.ID_COLUMN + " DESC");
+
+        return cursorToTrack(context, helper, trackCursor);
+    }
+
+    private static Track cursorToTrack(Context context, DatabaseHelper helper, Cursor cursor){
+        if(cursor.moveToFirst()){
+            long trackId = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.ID_COLUMN));
             Track track = new Track(trackId);
-            track.mName = trackCursor.getString(trackCursor.getColumnIndex(DatabaseHelper.NAME_COLUMN));
-            track.mStartTime = trackCursor.getLong(trackCursor.getColumnIndex(DatabaseHelper.DATE_COLUMN));
-            track.mDistance = trackCursor.getFloat(trackCursor.getColumnIndex(DatabaseHelper.DISTANCE_COLUMN));
-            track.mDuration = trackCursor.getFloat(trackCursor.getColumnIndex(DatabaseHelper.DURATION_COLUMN));
+            track.mName = cursor.getString(cursor.getColumnIndex(DatabaseHelper.NAME_COLUMN));
+            track.mStartTime = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.DATE_COLUMN));
+            track.mDistance = cursor.getFloat(cursor.getColumnIndex(DatabaseHelper.DISTANCE_COLUMN));
+            track.mDuration = cursor.getFloat(cursor.getColumnIndex(DatabaseHelper.DURATION_COLUMN));
+            track.mComplete = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COMPLETE_COLUMN));
 
             track.mContext = context;
             track.mDatabase = helper;
