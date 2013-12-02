@@ -14,6 +14,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 import com.ijmacd.gpstools.mobile.R;
@@ -106,20 +107,20 @@ public class TrackService extends Service {
      * Show a notification while this service is running.
      */
     private void showNotification() {
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = getText(R.string.local_service_started);
-
-        // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.ic_gps, text,
-                System.currentTimeMillis());
 
         // The PendingIntent to launch our activity if the user selects this notification
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, DashboardActivity.class), 0);
 
-        // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, getText(R.string.local_service_label),
-                text, contentIntent);
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+
+        builder.setSmallIcon(R.drawable.ic_gps);
+        builder.setContentText(getText(R.string.local_service_started));
+        builder.setContentTitle(getText(R.string.local_service_label));
+        builder.setOngoing(true);
+        builder.setContentIntent(contentIntent);
+
+        final Notification notification = builder.build();
 
         // Send the notification.
         mNotificationManager.notify(NOTIFICATION, notification);
