@@ -86,6 +86,8 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     private int mWidgetWidth;
 
     private int mWidgetHeight;
+    
+    final WidgetTypesHelper mWidgetTypesHelper = new WidgetTypesHelper(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -434,9 +436,10 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
             else {
                 final DashboardWidget widget = (DashboardWidget)view;
                 final int type = widget.getWidgetType();
-                final WidgetTypesHelper typesHelper = new WidgetTypesHelper(DashboardActivity.this);
-                final WidgetTypesHelper.WidgetDescription widgetDescription = typesHelper.getWidget(type);
-                Toast.makeText(DashboardActivity.this, widgetDescription.name, Toast.LENGTH_SHORT).show();
+                final WidgetTypesHelper.WidgetDescription widgetDescription = mWidgetTypesHelper.getWidget(type);
+                if(widgetDescription != null){
+                    Toast.makeText(DashboardActivity.this, widgetDescription.name, Toast.LENGTH_SHORT).show();
+                }
             }
         }
     };
