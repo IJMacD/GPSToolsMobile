@@ -37,6 +37,12 @@
         <category>gps</category>
     </widget>
     <widget>
+        <name>Speed</name>
+        <description>The current speed of the device</description>
+        <type>16</type>
+        <category>gps</category>
+    </widget>
+    <widget>
         <name>Altitude</name>
         <description>The current altitude</description>
         <type>7</type>
