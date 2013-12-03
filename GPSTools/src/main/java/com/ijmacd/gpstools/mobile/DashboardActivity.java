@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Canvas;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -374,13 +375,26 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
             mDragStartIndex = mGridLayout.indexOfChild(view);
             mGridLayout.addView(mSpace, mDragStartIndex);
+            final float scale = 1.2f;
+            final int viewWidth = _view.getWidth(),
+                      viewHeight = _view.getHeight(),
+                      shadowWidth = (int)Math.floor(viewWidth*scale),
+                      shadowHeight = (int)Math.floor(viewHeight*scale),
+                      dcx = (shadowWidth - viewWidth) / 2,
+                      dcy = (shadowHeight - viewHeight) / 2;
             View.DragShadowBuilder dragShadowBuilder = new View.DragShadowBuilder(view){
                 @Override
                 public void onProvideShadowMetrics(android.graphics.Point dimensions, android.graphics.Point touch_point){
-                    dimensions.x = getView().getWidth();
-                    dimensions.y = getView().getHeight();
-                    touch_point.x = mLastXTouch;
-                    touch_point.y = mLastYTouch;
+                    dimensions.x = shadowWidth;
+                    dimensions.y = shadowHeight;
+                    touch_point.x = mLastXTouch + dcx;
+                    touch_point.y = mLastYTouch + dcy;
+                }
+
+                @Override
+                public void onDrawShadow(Canvas canvas) {
+                    canvas.scale(scale,scale);
+                    super.onDrawShadow(canvas);
                 }
             };
             view.startDrag(null, dragShadowBuilder, view, 0);
