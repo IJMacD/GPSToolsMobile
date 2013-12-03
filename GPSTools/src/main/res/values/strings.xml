@@ -25,7 +25,6 @@
     <string name="units_lat">lat</string>
     <string name="units_lon">lon</string>
     <string name="units_heading">deg</string>
-    <string name="units_battery_level">%</string>
     <string name="pref_units_key">preference_units</string>
     <string name="pref_units">Default Units</string>
     <string name="pref_units_summary">Unit for widgets which don\'t specify their own</string>
@@ -63,6 +62,10 @@
     <string name="action_export">Export</string>
     <string name="track_saved">Track Saved</string>
     <string name="export_failed">Export failed. Mount sdcard first</string>
-    <string name="units_battery_temp">°C</string>
-    <string name="units_battery_volt">V</string>
+    <string name="units_temp">°C</string>
+    <string name="units_volt">V</string>
+    <string name="units_cm">cm</string>
+    <string name="units_lx">lx</string>
+    <string name="units_pressure">hPa</string>
+    <string name="units_percent">%</string>
 </resources>

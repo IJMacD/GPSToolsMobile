@@ -4,6 +4,10 @@ import android.content.*;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.*;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.*;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -72,6 +76,13 @@ public class DashboardWidget extends FrameLayout
 	public static final int WIDGET_BEARING = 128;
 	public static final int WIDGET_POINT_DISTANCE = 129;
 	public static final int WIDGET_POINT_TRUE_SPEED = 130;
+
+    // Sensor 160 - 191
+    public static final int WIDGET_PROXIMITY = 160;
+    public static final int WIDGET_LIGHT = 161;
+    public static final int WIDGET_AMBIENT_TEMPERATURE = 162;
+    public static final int WIDGET_PRESSURE = 163;
+    public static final int WIDGET_RELATIVE_HUMIDITY = 164;
 
     public static final int UNITS_DEFAULT = 0;
     public static final int UNITS_METRIC = 1;
@@ -300,8 +311,8 @@ public class DashboardWidget extends FrameLayout
         }
 	}
 
-    protected void setUnitsText(String unitsText){
-        String text = null;
+    protected void setUnitsText(CharSequence unitsText){
+        CharSequence text = null;
         if(unitsText != null && unitsText.length() > 0){
             text = unitsText;
         }
@@ -489,6 +500,12 @@ public class DashboardWidget extends FrameLayout
                 return new GPSLocationWidget(context, widgetType);
             case WIDGET_SATELLITES:
                 return new GPSStatusWidget(context);
+            case WIDGET_PROXIMITY:
+            case WIDGET_LIGHT:
+            case WIDGET_AMBIENT_TEMPERATURE:
+            case WIDGET_PRESSURE:
+            case WIDGET_RELATIVE_HUMIDITY:
+                return new SensorWidget(context, widgetType);
             default:
                 return new DashboardWidget(context, widgetType, unitsType);
         }
@@ -687,7 +704,7 @@ public class DashboardWidget extends FrameLayout
             };
             final Resources res = getResources();
             if (res != null) {
-                setUnitsText(res.getString(R.string.units_battery_level));
+                setUnitsText(res.getString(R.string.units_percent));
             }
             setCategoryImage(R.drawable.category_battery);
         }
@@ -713,7 +730,7 @@ public class DashboardWidget extends FrameLayout
             };
             final Resources res = getResources();
             if (res != null) {
-                setUnitsText(res.getString(R.string.units_battery_temp));
+                setUnitsText(res.getString(R.string.units_temp));
             }
             setCategoryImage(R.drawable.category_battery);
         }
@@ -739,7 +756,7 @@ public class DashboardWidget extends FrameLayout
             };
             final Resources res = getResources();
             if (res != null) {
-                setUnitsText(res.getString(R.string.units_battery_volt));
+                setUnitsText(res.getString(R.string.units_volt));
             }
             setValueFormat("%.2f");
             setCategoryImage(R.drawable.category_battery);
@@ -793,6 +810,65 @@ public class DashboardWidget extends FrameLayout
         public void onPause(){
             super.onPause();
             mHandler.removeCallbacks(mRunnable);
+        }
+    }
+
+    static class SensorWidget extends DashboardWidget {
+
+        private final SensorManager mSensorManager;
+        private Sensor mSensor = null;
+        private SensorEventListener mListener;
+
+        public SensorWidget(Context context, int widgetType) {
+            super(context, widgetType);
+            mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+
+            switch (widgetType){
+                case WIDGET_PROXIMITY:
+                    mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+                    setUnitsText(context.getText(R.string.units_cm));
+                    break;
+                case WIDGET_LIGHT:
+                    mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+                    setUnitsText(context.getText(R.string.units_lx));
+                    break;
+                case WIDGET_AMBIENT_TEMPERATURE:
+                    mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+                    setUnitsText(context.getText(R.string.units_temp));
+                    break;
+                case WIDGET_PRESSURE:
+                    mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+                    setUnitsText(context.getText(R.string.units_pressure));
+                    break;
+                case WIDGET_RELATIVE_HUMIDITY:
+                    mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
+                    setUnitsText(context.getText(R.string.units_percent));
+                    break;
+            }
+
+            mListener = new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+                    setValue(event.values[0]);
+                }
+
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+                }
+            };
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            mSensorManager.registerListener(mListener, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            mSensorManager.unregisterListener(mListener);
         }
     }
 }

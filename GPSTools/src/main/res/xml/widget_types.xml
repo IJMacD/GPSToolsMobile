@@ -120,4 +120,34 @@
         <type>128</type>
         <category>point</category>
     </widget>
+    <widget>
+        <name>Proximity</name>
+        <description>Value of the proximity sensor</description>
+        <type>160</type>
+        <category>sensor</category>
+    </widget>
+    <widget>
+        <name>Light</name>
+        <description>Value of the light sensor</description>
+        <type>161</type>
+        <category>sensor</category>
+    </widget>
+    <widget>
+        <name>Ambient Temperature</name>
+        <description>Value of the ambient temperature sensor</description>
+        <type>162</type>
+        <category>sensor</category>
+    </widget>
+    <widget>
+        <name>Pressure</name>
+        <description>Value of the pressure sensor</description>
+        <type>163</type>
+        <category>sensor</category>
+    </widget>
+    <widget>
+        <name>Relative Humidity</name>
+        <description>Value of the relative humidity sensor</description>
+        <type>164</type>
+        <category>sensor</category>
+    </widget>
 </widget_types>
