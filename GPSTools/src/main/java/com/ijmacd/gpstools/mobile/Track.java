@@ -18,7 +18,16 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class Track {
+    private static final String[] mTrackColumns = new String[]{
+            DatabaseHelper.ID_COLUMN,
+            DatabaseHelper.NAME_COLUMN,
+            DatabaseHelper.DATE_COLUMN,
+            DatabaseHelper.DISTANCE_COLUMN,
+            DatabaseHelper.DURATION_COLUMN,
+            DatabaseHelper.COMPLETE_COLUMN
+    };
     private final List<Point> mPoints = new ArrayList<Point>(BUFFER_POINTS);
+
     private float mDistance;
     private float mDuration;
     private long mStartTime;
@@ -32,6 +41,7 @@ public class Track {
     private Point mLastPoint;
 
     private static final int BUFFER_POINTS = 0;
+
     private int mComplete = 0;
 
     public Track(Context context){
@@ -219,13 +229,7 @@ public class Track {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor trackCursor = db.query(
                 DatabaseHelper.TRACK_TABLE_NAME,
-                new String[]{
-                        DatabaseHelper.NAME_COLUMN,
-                        DatabaseHelper.DATE_COLUMN,
-                        DatabaseHelper.DISTANCE_COLUMN,
-                        DatabaseHelper.DURATION_COLUMN,
-                        DatabaseHelper.COMPLETE_COLUMN
-                },
+                mTrackColumns,
                 DatabaseHelper.ID_COLUMN + " = ?",
                 new String[]{
                         String.valueOf(trackId)
@@ -241,14 +245,7 @@ public class Track {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor trackCursor = db.query(
                 DatabaseHelper.TRACK_TABLE_NAME,
-                new String[]{
-                        DatabaseHelper.ID_COLUMN,
-                        DatabaseHelper.NAME_COLUMN,
-                        DatabaseHelper.DATE_COLUMN,
-                        DatabaseHelper.DISTANCE_COLUMN,
-                        DatabaseHelper.DURATION_COLUMN,
-                        DatabaseHelper.COMPLETE_COLUMN
-                },
+                mTrackColumns,
                 null, null,
                 null, null, DatabaseHelper.ID_COLUMN + " DESC");
 
@@ -257,7 +254,7 @@ public class Track {
 
     private static Track cursorToTrack(Context context, DatabaseHelper helper, Cursor cursor){
         if(cursor.moveToFirst()){
-            long trackId = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.ID_COLUMN));
+            final long trackId = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.ID_COLUMN));
             Track track = new Track(trackId);
             track.mName = cursor.getString(cursor.getColumnIndex(DatabaseHelper.NAME_COLUMN));
             track.mStartTime = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.DATE_COLUMN));
