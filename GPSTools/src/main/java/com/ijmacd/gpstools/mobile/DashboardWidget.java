@@ -83,6 +83,9 @@ public class DashboardWidget extends FrameLayout
     public static final int WIDGET_AMBIENT_TEMPERATURE = 162;
     public static final int WIDGET_PRESSURE = 163;
     public static final int WIDGET_RELATIVE_HUMIDITY = 164;
+    public static final int WIDGET_ACCELERATION = 165;
+    public static final int WIDGET_GRAVITY = 166;
+    public static final int WIDGET_LINEAR_ACCELERATION = 167;
 
     public static final int UNITS_DEFAULT = 0;
     public static final int UNITS_METRIC = 1;
@@ -505,6 +508,9 @@ public class DashboardWidget extends FrameLayout
             case WIDGET_AMBIENT_TEMPERATURE:
             case WIDGET_PRESSURE:
             case WIDGET_RELATIVE_HUMIDITY:
+            case WIDGET_ACCELERATION:
+            case WIDGET_GRAVITY:
+            case WIDGET_LINEAR_ACCELERATION:
                 return new SensorWidget(context, widgetType);
             default:
                 return new DashboardWidget(context, widgetType, unitsType);
@@ -819,7 +825,7 @@ public class DashboardWidget extends FrameLayout
         private Sensor mSensor = null;
         private SensorEventListener mListener;
 
-        public SensorWidget(Context context, int widgetType) {
+        public SensorWidget(Context context, final int widgetType) {
             super(context, widgetType);
             mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
 
@@ -844,12 +850,39 @@ public class DashboardWidget extends FrameLayout
                     mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
                     setUnitsText(context.getText(R.string.units_percent));
                     break;
+                case WIDGET_ACCELERATION:
+                    mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                    setUnitsText(context.getText(R.string.units_acceleration));
+                    setValueFormat("%.2f");
+                    break;
+                case WIDGET_GRAVITY:
+                    mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+                    setUnitsText(context.getText(R.string.units_acceleration));
+                    setValueFormat("%.2f");
+                    break;
+                case WIDGET_LINEAR_ACCELERATION:
+                    mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+                    setUnitsText(context.getText(R.string.units_acceleration));
+                    setValueFormat("%.2f");
+                    break;
             }
 
             mListener = new SensorEventListener() {
                 @Override
                 public void onSensorChanged(SensorEvent event) {
-                    setValue(event.values[0]);
+                    switch(widgetType){
+                        case WIDGET_ACCELERATION:
+                        case WIDGET_GRAVITY:
+                        case WIDGET_LINEAR_ACCELERATION:
+                            final double value = Math.sqrt(
+                                    event.values[0]*event.values[0] +
+                                    event.values[1]*event.values[1] +
+                                    event.values[2]*event.values[2]);
+                            setValue(value);
+                            break;
+                    default:
+                        setValue(event.values[0]);
+                    }
                 }
 
                 @Override
@@ -862,7 +895,7 @@ public class DashboardWidget extends FrameLayout
         @Override
         public void onResume() {
             super.onResume();
-            mSensorManager.registerListener(mListener, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(mListener, mSensor, SensorManager.SENSOR_DELAY_UI);
         }
 
         @Override

@@ -150,4 +150,22 @@
         <type>164</type>
         <category>sensor</category>
     </widget>
+    <widget>
+        <name>Acceleration</name>
+        <description>Magnitude of the vector reported by the accelerometer</description>
+        <type>165</type>
+        <category>sensor</category>
+    </widget>
+    <widget>
+        <name>Gravity</name>
+        <description>Calculated value of gravity acting on the device</description>
+        <type>166</type>
+        <category>sensor</category>
+    </widget>
+    <widget>
+        <name>Linear Acceleration</name>
+        <description>Calculated acceleration of the device</description>
+        <type>167</type>
+        <category>sensor</category>
+    </widget>
 </widget_types>
