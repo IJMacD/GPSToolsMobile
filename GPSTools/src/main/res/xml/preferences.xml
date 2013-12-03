@@ -19,4 +19,10 @@
         android:entries="@array/pref_freq"
         android:entryValues="@array/pref_freq_values"
         android:defaultValue="@integer/default_record_freq"/>
+    <ListPreference
+        android:key="@string/pref_orientation_key"
+        android:title="@string/pref_orientation"
+        android:entries="@array/pref_orientation"
+        android:entryValues="@array/pref_orientation_values"
+        android:defaultValue="@integer/default_orientation"/>
 </PreferenceScreen>

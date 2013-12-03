@@ -6,10 +6,13 @@ import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
+import android.graphics.drawable.GradientDrawable;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -57,6 +60,8 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
      */
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
+    private static final String PREF_ORIENTATION = "pref_orientation";
+
     private TrackService mTrackService;
 
     private Track mCurrentTrack;
@@ -86,8 +91,10 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     private int mWidgetWidth;
 
     private int mWidgetHeight;
-    
+
     final WidgetTypesHelper mWidgetTypesHelper = new WidgetTypesHelper(this);
+    private SharedPreferences mPreferences;
+    private SharedPreferences.OnSharedPreferenceChangeListener mPreferencesReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +104,18 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        updateOrientation();
+
+        mPreferencesReceiver = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key.equals(PREF_ORIENTATION)){
+                    updateOrientation();
+                }
+            }
+        };
 
         mDatabase = new DatabaseHelper(this);
 
@@ -147,10 +166,19 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         }
     }
 
+    private void updateOrientation() {
+        int orientation = Integer.parseInt(
+                mPreferences.getString(PREF_ORIENTATION,
+                        ActivityInfo.SCREEN_ORIENTATION_SENSOR + ""));
+        setRequestedOrientation(orientation);
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
         Log.d(LOG_TAG, "onPause()");
+
+        mPreferences.unregisterOnSharedPreferenceChangeListener(mPreferencesReceiver);
 
         for(DashboardWidget widget : mWidgets){
             widget.onPause();
@@ -164,6 +192,9 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setSelectedNavigationItem(0);
+
+        mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesReceiver);
+        updateOrientation();
 
         for(DashboardWidget widget : mWidgets){
             widget.onResume();
@@ -192,7 +223,6 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         outState.putInt(STATE_SELECTED_NAVIGATION_ITEM,
                 getSupportActionBar().getSelectedNavigationIndex());
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

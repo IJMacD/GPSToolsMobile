@@ -15,6 +15,7 @@ public class SettingsActivity extends PreferenceActivity
     private String mPreferenceUnitsKey;
     private String mPreferenceDisplayFrequencyKey;
     private String mPreferenceRecordFrequencyKey;
+    private String mPreferenceOrientationKey;
     private SharedPreferences mSharedPreferences;
 
     @Override
@@ -25,6 +26,7 @@ public class SettingsActivity extends PreferenceActivity
         mPreferenceUnitsKey = res.getString(R.string.pref_units_key);
         mPreferenceDisplayFrequencyKey = res.getString(R.string.pref_display_freq_key);
         mPreferenceRecordFrequencyKey = res.getString(R.string.pref_record_freq_key);
+        mPreferenceOrientationKey = res.getString(R.string.pref_orientation_key);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mSharedPreferences.registerOnSharedPreferenceChangeListener(this);
@@ -44,6 +46,11 @@ public class SettingsActivity extends PreferenceActivity
         setSummary(mPreferenceRecordFrequencyKey,
                 res.getStringArray(R.array.pref_freq),
                 res.getStringArray(R.array.pref_freq_values)
+        );
+
+        setSummary(mPreferenceOrientationKey,
+                res.getStringArray(R.array.pref_orientation),
+                res.getStringArray(R.array.pref_orientation_values)
         );
 
 //        ActionBar actionBar = getSupportActionBar();
@@ -77,6 +84,12 @@ public class SettingsActivity extends PreferenceActivity
             setSummary(key,
                     res.getStringArray(R.array.pref_freq),
                     res.getStringArray(R.array.pref_freq_values)
+            );
+        }
+        else if(key.equals(mPreferenceOrientationKey)){
+            setSummary(key,
+                    res.getStringArray(R.array.pref_orientation),
+                    res.getStringArray(R.array.pref_orientation_values)
             );
         }
     }

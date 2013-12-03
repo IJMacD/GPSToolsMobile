@@ -69,4 +69,6 @@
     <string name="units_pressure">hPa</string>
     <string name="units_percent">%</string>
     <string name="units_acceleration">m/s²</string>
+    <string name="pref_orientation">Dashboard Orientation</string>
+    <string name="pref_orientation_key">pref_orientation</string>
 </resources>

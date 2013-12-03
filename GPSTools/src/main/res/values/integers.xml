@@ -2,4 +2,5 @@
 <resources>
     <integer name="default_display_freq">1000</integer>
     <integer name="default_record_freq">1000</integer>
+    <integer name="default_orientation">4</integer>
 </resources>

@@ -26,4 +26,14 @@
         <item>Dashboard</item>
         <item>Tracks</item>
     </string-array>
+    <string-array name="pref_orientation">
+        <item>Auto</item>
+        <item>Landscape</item>
+        <item>Portrait</item>
+    </string-array>
+    <string-array name="pref_orientation_values">
+        <item>4</item>
+        <item>0</item>
+        <item>1</item>
+    </string-array>
 </resources>
