@@ -31,6 +31,7 @@ import android.support.v7.widget.Space;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -429,6 +430,13 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
                     mSelectedWidgets.add((DashboardWidget) view);
                     mEditItem.setVisible(false);
                 }
+            }
+            else {
+                final DashboardWidget widget = (DashboardWidget)view;
+                final int type = widget.getWidgetType();
+                final WidgetTypesHelper typesHelper = new WidgetTypesHelper(DashboardActivity.this);
+                final WidgetTypesHelper.WidgetDescription widgetDescription = typesHelper.getWidget(type);
+                Toast.makeText(DashboardActivity.this, widgetDescription.name, Toast.LENGTH_SHORT).show();
             }
         }
     };
