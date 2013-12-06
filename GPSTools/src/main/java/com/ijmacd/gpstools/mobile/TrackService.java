@@ -66,7 +66,7 @@ public class TrackService extends Service {
         // Check the database for unfinished tracks
         if(intent == null){
             Track track = Track.getLatestTrack(this);
-            if(!track.isComplete()){
+            if(track != null && !track.isComplete()){
                 Log.i(LOG_TAG, "Recovered incomplete track");
                 startLogging(track);
             }
