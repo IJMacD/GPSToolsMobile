@@ -59,7 +59,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 DATE_COLUMN  + " INTEGER, " +
                 NAME_COLUMN + " INTEGER, " +
                 DISTANCE_COLUMN + " INTEGER, " +
-                DURATION_COLUMN + " INTEGER" +
+                DURATION_COLUMN + " INTEGER, " +
+                COMPLETE_COLUMN + " INTEGER" +
                 ");");
         db.execSQL("CREATE TABLE " + TRACKPOINT_TABLE_NAME + " (" +
                 ID_COLUMN + " INTEGER PRIMARY KEY, " +
@@ -70,8 +71,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 ALTITUDE_COLUMN + " REAL, " +
                 ACCURACY_COLUMN + " REAL, " +
                 SPEED_COLUMN + " REAL, " +
-                HEADING_COLUMN + " INTEGER, " +
-                COMPLETE_COLUMN + " INTEGER" +
+                HEADING_COLUMN + " INTEGER" +
                 ");");
     }
 
