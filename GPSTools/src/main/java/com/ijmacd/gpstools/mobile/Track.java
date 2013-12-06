@@ -249,7 +249,12 @@ public class Track {
                 null, null,
                 null, null, DatabaseHelper.ID_COLUMN + " DESC");
 
-        return cursorToTrack(context, helper, trackCursor);
+        try {
+            return cursorToTrack(context, helper, trackCursor);
+        }
+        catch (TrackException e){
+            return null;
+        }
     }
 
     private static Track cursorToTrack(Context context, DatabaseHelper helper, Cursor cursor){
