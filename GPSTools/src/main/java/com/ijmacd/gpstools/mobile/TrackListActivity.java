@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
@@ -26,6 +28,11 @@ public class TrackListActivity extends ActionBarActivity implements ActionBar.On
 
     private SimpleCursorAdapter mAdapter;
     private ActionMode mActionMode;
+    private CharSequence mTitle;
+    private CharSequence mDrawerTitle;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -144,31 +151,52 @@ public class TrackListActivity extends ActionBarActivity implements ActionBar.On
             }
         });
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(), R.array.navigation_labels, R.layout.spinner_view);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mTitle = mDrawerTitle = getTitle();
 
-        // Set up the dropdown list navigation in the action bar.
-        actionBar.setListNavigationCallbacks(adapter, this);
+        // Set up the action bar to show a dropdown list.
+        final ActionBar actionBar = getSupportActionBar();
 
-        setTitle("");
+        final String[] navigationLabels = getResources().getStringArray(R.array.navigation_labels);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, navigationLabels));
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener(this, mDrawerLayout));
+
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                getActionBar().setTitle(mTitle);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getActionBar().setTitle(mDrawerTitle);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+
     }
     @Override
     protected void onResume(){
         super.onResume();
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setSelectedNavigationItem(1);
     }
 
     @Override
     public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-        if(itemPosition == 0){
-            Intent intent = new Intent(this, DashboardActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        }
+
         return true;
     }
 

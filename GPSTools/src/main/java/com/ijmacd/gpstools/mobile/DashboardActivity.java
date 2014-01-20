@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,6 +16,8 @@ import android.graphics.Canvas;
 import android.graphics.drawable.GradientDrawable;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
@@ -32,6 +35,7 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.support.v7.widget.Space;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -95,6 +99,11 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     final WidgetTypesHelper mWidgetTypesHelper = new WidgetTypesHelper(this);
     private SharedPreferences mPreferences;
     private SharedPreferences.OnSharedPreferenceChangeListener mPreferencesReceiver;
+    private CharSequence mTitle;
+    private CharSequence mDrawerTitle;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,18 +147,53 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         mSpace.setOnDragListener(mDragListener);
 //        mDragLayer = (FrameLayout)findViewById(R.id.drag_layer);
 
+        mTitle = mDrawerTitle = getTitle();
+
         // Set up the action bar to show a dropdown list.
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(), R.array.navigation_labels, R.layout.spinner_view);
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, new String[]{"Dashboard","+ Add New"});
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         // Set up the dropdown list navigation in the action bar.
         actionBar.setListNavigationCallbacks(adapter, this);
 
-        setTitle("");
+        final String[] navigationLabels = getResources().getStringArray(R.array.navigation_labels);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, navigationLabels));
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener(this, mDrawerLayout));
+
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                getActionBar().setTitle(mTitle);
+                actionBar.setDisplayShowTitleEnabled(false);
+                actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getActionBar().setTitle(mDrawerTitle);
+                actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+                actionBar.setDisplayShowTitleEnabled(true);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
 
         android.graphics.Point size = new android.graphics.Point();
         getWindowManager().getDefaultDisplay().getSize(size);
@@ -173,6 +217,29 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         setRequestedOrientation(orientation);
     }
 
+    /* Called whenever we call invalidateOptionsMenu() */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // If the nav drawer is open, hide action items related to the content view
+        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+        menu.findItem(R.id.action_add).setVisible(!drawerOpen);
+        menu.findItem(R.id.action_record).setVisible(!drawerOpen);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -191,7 +258,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         Log.d(LOG_TAG, "onResume()");
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setSelectedNavigationItem(0);
+        //actionBar.setSelectedNavigationItem(0);
 
         mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesReceiver);
         updateOrientation();
@@ -238,9 +305,15 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Pass the event to ActionBarDrawerToggle, if it returns
+        // true, then it has handled the app icon touch event
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+        //
         int id = item.getItemId();
         switch (id){
             case R.id.action_add:
@@ -277,11 +350,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     public boolean onNavigationItemSelected(int position, long id) {
         // When the given dropdown item is selected, show its contents in the
         // container view.
-        if(position == 1){
-            Intent intent = new Intent(this, TrackListActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        }
+
         return true;
     }
 

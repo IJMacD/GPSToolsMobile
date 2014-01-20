@@ -71,4 +71,6 @@
     <string name="units_acceleration">m/s²</string>
     <string name="pref_orientation">Dashboard Orientation</string>
     <string name="pref_orientation_key">pref_orientation</string>
+    <string name="drawer_open">Drawer Open</string>
+    <string name="drawer_close">Drawer close</string>
 </resources>
