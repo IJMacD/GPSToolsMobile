@@ -508,6 +508,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     };
 
     private View.OnClickListener mClickListener = new View.OnClickListener() {
+        Toast mToast;
         @Override
         public void onClick(View view) {
             if(mActionMode != null){
@@ -537,7 +538,11 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
                 final int type = widget.getWidgetType();
                 final WidgetTypesHelper.WidgetDescription widgetDescription = mWidgetTypesHelper.getWidget(type);
                 if(widgetDescription != null){
-                    Toast.makeText(DashboardActivity.this, widgetDescription.name, Toast.LENGTH_SHORT).show();
+                    if(mToast == null){
+                        mToast = Toast.makeText(DashboardActivity.this, widgetDescription.name, Toast.LENGTH_SHORT);
+                    }
+                    mToast.setText(widgetDescription.name);
+                    mToast.show();
                 }
             }
         }
