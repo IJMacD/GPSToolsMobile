@@ -500,7 +500,7 @@ public class DashboardWidget extends FrameLayout
             case WIDGET_GPSDATE:
             case WIDGET_GPSTIME:
             case WIDGET_GPSDATETIME:
-                return new GPSLocationWidget(context, widgetType);
+                return new GPSLocationWidget(context, widgetType, unitsType);
             case WIDGET_SATELLITES:
                 return new GPSStatusWidget(context);
             case WIDGET_PROXIMITY:
@@ -522,8 +522,8 @@ public class DashboardWidget extends FrameLayout
         private final LocationManager mLocationManager;
         private final LocationListener mLocationListener;
 
-        public GPSLocationWidget(Context context, final int widgetType){
-            super(context, widgetType);
+        public GPSLocationWidget(Context context, final int widgetType, int unitsType){
+            super(context, widgetType, unitsType);
             mContext = context;
 
             final DateFormat dateFormat;
