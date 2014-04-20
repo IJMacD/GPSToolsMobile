@@ -1,0 +1,833 @@
+<html>
+<head>
+<title>DashboardActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(0,128,0); font-weight: bold; }
+.s3 { color: rgb(0,0,255); }
+.s4 { color: rgb(128,128,128); font-style: italic; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+DashboardActivity.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<span class="s0">package </span><span class="s1">com.ijmacd.gpstools.mobile; 
+ 
+</span><span class="s0">import </span><span class="s1">android.app.Dialog; 
+</span><span class="s0">import </span><span class="s1">android.app.TaskStackBuilder; 
+</span><span class="s0">import </span><span class="s1">android.content.ComponentName; 
+</span><span class="s0">import </span><span class="s1">android.content.ContentValues; 
+</span><span class="s0">import </span><span class="s1">android.content.Intent; 
+</span><span class="s0">import </span><span class="s1">android.content.ServiceConnection; 
+</span><span class="s0">import </span><span class="s1">android.content.SharedPreferences; 
+</span><span class="s0">import </span><span class="s1">android.content.pm.ActivityInfo; 
+</span><span class="s0">import </span><span class="s1">android.content.res.Resources; 
+</span><span class="s0">import </span><span class="s1">android.database.Cursor; 
+</span><span class="s0">import </span><span class="s1">android.database.sqlite.SQLiteDatabase; 
+</span><span class="s0">import </span><span class="s1">android.graphics.Canvas; 
+</span><span class="s0">import </span><span class="s1">android.graphics.drawable.GradientDrawable; 
+</span><span class="s0">import </span><span class="s1">android.os.IBinder; 
+</span><span class="s0">import </span><span class="s1">android.preference.PreferenceManager; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.app.ActionBarActivity; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.app.ActionBar; 
+</span><span class="s0">import </span><span class="s1">android.os.Bundle; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.widget.GridLayout; 
+</span><span class="s0">import </span><span class="s1">android.util.Log; 
+</span><span class="s0">import </span><span class="s1">android.view.ActionMode; 
+</span><span class="s0">import </span><span class="s1">android.view.DragEvent; 
+</span><span class="s0">import </span><span class="s1">android.view.HapticFeedbackConstants; 
+</span><span class="s0">import </span><span class="s1">android.view.Menu; 
+</span><span class="s0">import </span><span class="s1">android.view.MenuInflater; 
+</span><span class="s0">import </span><span class="s1">android.view.MenuItem; 
+</span><span class="s0">import </span><span class="s1">android.view.MotionEvent; 
+</span><span class="s0">import </span><span class="s1">android.view.View; 
+</span><span class="s0">import </span><span class="s1">android.view.WindowManager; 
+</span><span class="s0">import </span><span class="s1">android.widget.ArrayAdapter; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.widget.Space; 
+</span><span class="s0">import </span><span class="s1">android.widget.Button; 
+</span><span class="s0">import </span><span class="s1">android.widget.NumberPicker; 
+</span><span class="s0">import </span><span class="s1">android.widget.Spinner; 
+</span><span class="s0">import </span><span class="s1">android.widget.Toast; 
+ 
+</span><span class="s0">import </span><span class="s1">java.util.ArrayList; 
+ 
+</span><span class="s0">public class </span><span class="s1">DashboardActivity </span><span class="s0">extends </span><span class="s1">ActionBarActivity </span><span class="s0">implements </span><span class="s1">ActionBar.OnNavigationListener { 
+ 
+    </span><span class="s0">private static final </span><span class="s1">String LOG_TAG = </span><span class="s2">&quot;GPSTools&quot;</span><span class="s1">; 
+ 
+    </span><span class="s0">private static final int </span><span class="s1">DIALOG_EDIT = </span><span class="s3">1</span><span class="s1">; 
+ 
+    </span><span class="s0">private static final int </span><span class="s1">DIALOG_ADD = </span><span class="s3">2</span><span class="s1">; 
+ 
+    </span><span class="s0">public static final </span><span class="s1">String EXTRA_COLS = </span><span class="s2">&quot;cols&quot;</span><span class="s1">; 
+ 
+    </span><span class="s0">public static final </span><span class="s1">String EXTRA_ROWS = </span><span class="s2">&quot;rows&quot;</span><span class="s1">; 
+ 
+    </span><span class="s0">public static final </span><span class="s1">String EXTRA_UNITS = </span><span class="s2">&quot;units&quot;</span><span class="s1">; 
+ 
+    </span><span class="s0">public static final </span><span class="s1">String EXTRA_TRACK = </span><span class="s2">&quot;track&quot;</span><span class="s1">; 
+ 
+    </span><span class="s4">/** 
+     * The serialization (saved instance state) Bundle key representing the 
+     * current dropdown position. 
+     */</span><span class="s1"> 
+    </span><span class="s0">private static final </span><span class="s1">String STATE_SELECTED_NAVIGATION_ITEM = </span><span class="s2">&quot;selected_navigation_item&quot;</span><span class="s1">; 
+ 
+    </span><span class="s0">private static final </span><span class="s1">String PREF_ORIENTATION = </span><span class="s2">&quot;pref_orientation&quot;</span><span class="s1">; 
+ 
+    </span><span class="s0">private </span><span class="s1">TrackService mTrackService; 
+ 
+    </span><span class="s0">private </span><span class="s1">Track mCurrentTrack; 
+ 
+    </span><span class="s0">private </span><span class="s1">ArrayList&lt;DashboardWidget&gt; mWidgets = </span><span class="s0">new </span><span class="s1">ArrayList&lt;DashboardWidget&gt;(); 
+ 
+    </span><span class="s0">private </span><span class="s1">ArrayList&lt;DashboardWidget&gt; mSelectedWidgets = </span><span class="s0">new </span><span class="s1">ArrayList&lt;DashboardWidget&gt;(); 
+ 
+    </span><span class="s0">private boolean </span><span class="s1">mIsBound; 
+ 
+    </span><span class="s0">private boolean </span><span class="s1">mRecording; 
+ 
+    </span><span class="s0">private </span><span class="s1">MenuItem mRecordItem; 
+ 
+    </span><span class="s0">private </span><span class="s1">MenuItem mEditItem; 
+ 
+    </span><span class="s0">private </span><span class="s1">DatabaseHelper mDatabase; 
+ 
+    </span><span class="s0">private </span><span class="s1">GridLayout mGridLayout; 
+ 
+    </span><span class="s4">// private FrameLayout mDragLayer;</span><span class="s1"> 
+ 
+    </span><span class="s0">private </span><span class="s1">Space mSpace; 
+ 
+    </span><span class="s0">private </span><span class="s1">ActionMode mActionMode; 
+ 
+    </span><span class="s0">private int </span><span class="s1">mWidgetWidth; 
+ 
+    </span><span class="s0">private int </span><span class="s1">mWidgetHeight; 
+ 
+    </span><span class="s0">final </span><span class="s1">WidgetTypesHelper mWidgetTypesHelper = </span><span class="s0">new </span><span class="s1">WidgetTypesHelper(</span><span class="s0">this</span><span class="s1">); 
+    </span><span class="s0">private </span><span class="s1">SharedPreferences mPreferences; 
+    </span><span class="s0">private </span><span class="s1">SharedPreferences.OnSharedPreferenceChangeListener mPreferencesReceiver; 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onCreate(Bundle savedInstanceState) { 
+        </span><span class="s0">super</span><span class="s1">.onCreate(savedInstanceState); 
+        setContentView(R.layout.activity_dashboard); 
+ 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); 
+ 
+        PreferenceManager.setDefaultValues(</span><span class="s0">this</span><span class="s1">, R.xml.preferences, </span><span class="s0">false</span><span class="s1">); 
+ 
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(</span><span class="s0">this</span><span class="s1">); 
+ 
+        updateOrientation(); 
+ 
+        mPreferencesReceiver = </span><span class="s0">new </span><span class="s1">SharedPreferences.OnSharedPreferenceChangeListener() { 
+            </span><span class="s0">public void </span><span class="s1">onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) { 
+                </span><span class="s0">if </span><span class="s1">(key.equals(PREF_ORIENTATION)){ 
+                    updateOrientation(); 
+                } 
+            } 
+        }; 
+ 
+        mDatabase = </span><span class="s0">new </span><span class="s1">DatabaseHelper(</span><span class="s0">this</span><span class="s1">); 
+ 
+        mGridLayout = (GridLayout)findViewById(R.id.grid_dashboard); 
+ 
+        mGridLayout.setOnClickListener(</span><span class="s0">new </span><span class="s1">View.OnClickListener() { 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">onClick(View v) { 
+                </span><span class="s0">if </span><span class="s1">(mActionMode != </span><span class="s0">null</span><span class="s1">) { 
+                    mActionMode.finish(); 
+                } 
+            } 
+        }); 
+ 
+        mSpace = </span><span class="s0">new </span><span class="s1">Space(</span><span class="s0">this</span><span class="s1">); 
+        </span><span class="s4">// Bastard! This line took some source code digging to find</span><span class="s1"> 
+        </span><span class="s4">// ViewGroups do not pass on dragEvents to children which are not visible</span><span class="s1"> 
+        </span><span class="s4">// Spaces set themselves to not be visible in their constructors</span><span class="s1"> 
+        mSpace.setVisibility(View.VISIBLE); 
+        mSpace.setOnDragListener(mDragListener); 
+</span><span class="s4">//        mDragLayer = (FrameLayout)findViewById(R.id.drag_layer);</span><span class="s1"> 
+ 
+        </span><span class="s4">// Set up the action bar to show a dropdown list.</span><span class="s1"> 
+        </span><span class="s0">final </span><span class="s1">ActionBar actionBar = getSupportActionBar(); 
+        actionBar.setDisplayShowTitleEnabled(</span><span class="s0">false</span><span class="s1">); 
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST); 
+ 
+        ArrayAdapter&lt;CharSequence&gt; adapter = ArrayAdapter.createFromResource(getApplicationContext(), R.array.navigation_labels, R.layout.spinner_view); 
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); 
+ 
+        </span><span class="s4">// Set up the dropdown list navigation in the action bar.</span><span class="s1"> 
+        actionBar.setListNavigationCallbacks(adapter, </span><span class="s0">this</span><span class="s1">); 
+ 
+        setTitle(</span><span class="s2">&quot;&quot;</span><span class="s1">); 
+ 
+        android.graphics.Point size = </span><span class="s0">new </span><span class="s1">android.graphics.Point(); 
+        getWindowManager().getDefaultDisplay().getSize(size); 
+        </span><span class="s0">int </span><span class="s1">screenWidth = size.x - </span><span class="s3">16</span><span class="s1">; 
+        mWidgetWidth = screenWidth / mGridLayout.getColumnCount(); 
+        mWidgetHeight = (</span><span class="s0">int</span><span class="s1">)(</span><span class="s3">90f </span><span class="s1">* getResources().getDisplayMetrics().density); 
+ 
+        </span><span class="s4">//mCurrentTrack = new Track(this);</span><span class="s1"> 
+        doBindService(); 
+ 
+        loadWidgets(); 
+        </span><span class="s0">if</span><span class="s1">(mWidgets.size() == </span><span class="s3">0</span><span class="s1">){ 
+            addDefaultWidgets(); 
+        } 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">updateOrientation() { 
+        </span><span class="s0">int </span><span class="s1">orientation = Integer.parseInt( 
+                mPreferences.getString(PREF_ORIENTATION, 
+                        ActivityInfo.SCREEN_ORIENTATION_SENSOR + </span><span class="s2">&quot;&quot;</span><span class="s1">)); 
+        setRequestedOrientation(orientation); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onPause() { 
+        </span><span class="s0">super</span><span class="s1">.onPause(); 
+        Log.d(LOG_TAG, </span><span class="s2">&quot;onPause()&quot;</span><span class="s1">); 
+ 
+        mPreferences.unregisterOnSharedPreferenceChangeListener(mPreferencesReceiver); 
+ 
+        </span><span class="s0">for</span><span class="s1">(DashboardWidget widget : mWidgets){ 
+            widget.onPause(); 
+        } 
+    } 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onResume() { 
+        </span><span class="s0">super</span><span class="s1">.onResume(); 
+        Log.d(LOG_TAG, </span><span class="s2">&quot;onResume()&quot;</span><span class="s1">); 
+ 
+        ActionBar actionBar = getSupportActionBar(); 
+        actionBar.setSelectedNavigationItem(</span><span class="s3">0</span><span class="s1">); 
+ 
+        mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesReceiver); 
+        updateOrientation(); 
+ 
+        </span><span class="s0">for</span><span class="s1">(DashboardWidget widget : mWidgets){ 
+            widget.onResume(); 
+        } 
+    } 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onDestroy() { 
+        </span><span class="s0">super</span><span class="s1">.onDestroy(); 
+        Log.d(LOG_TAG, </span><span class="s2">&quot;onDestroy()&quot;</span><span class="s1">); 
+        doUnbindService(); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onRestoreInstanceState(Bundle savedInstanceState) { 
+        </span><span class="s4">// Restore the previously serialized current dropdown position.</span><span class="s1"> 
+        </span><span class="s0">if </span><span class="s1">(savedInstanceState.containsKey(STATE_SELECTED_NAVIGATION_ITEM)) { 
+            getSupportActionBar().setSelectedNavigationItem( 
+                    savedInstanceState.getInt(STATE_SELECTED_NAVIGATION_ITEM)); 
+        } 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onSaveInstanceState(Bundle outState) { 
+        </span><span class="s4">// Serialize the current dropdown position.</span><span class="s1"> 
+        outState.putInt(STATE_SELECTED_NAVIGATION_ITEM, 
+                getSupportActionBar().getSelectedNavigationIndex()); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public boolean </span><span class="s1">onCreateOptionsMenu(Menu menu) { 
+         
+        </span><span class="s4">// Inflate the menu; this adds items to the action bar if it is present.</span><span class="s1"> 
+        getMenuInflater().inflate(R.menu.dashboard, menu); 
+        mRecordItem = menu.findItem(R.id.action_record); 
+        </span><span class="s0">if</span><span class="s1">(mRecording){ 
+            setRecording(</span><span class="s0">true</span><span class="s1">); 
+        } 
+        </span><span class="s0">return true</span><span class="s1">; 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public boolean </span><span class="s1">onOptionsItemSelected(MenuItem item) { 
+        </span><span class="s4">// Handle action bar item clicks here. The action bar will</span><span class="s1"> 
+        </span><span class="s4">// automatically handle clicks on the Home/Up button, so long</span><span class="s1"> 
+        </span><span class="s4">// as you specify a parent activity in AndroidManifest.xml.</span><span class="s1"> 
+        </span><span class="s0">int </span><span class="s1">id = item.getItemId(); 
+        </span><span class="s0">switch </span><span class="s1">(id){ 
+            </span><span class="s0">case </span><span class="s1">R.id.action_add: 
+                showDialog(DIALOG_ADD); 
+                </span><span class="s0">break</span><span class="s1">; 
+            </span><span class="s0">case </span><span class="s1">R.id.action_record: 
+                </span><span class="s0">if</span><span class="s1">(mRecording){ 
+                    mTrackService.stopLogging(); 
+                    Intent intent = </span><span class="s0">new </span><span class="s1">Intent(</span><span class="s0">this</span><span class="s1">, TrackDetailActivity.</span><span class="s0">class</span><span class="s1">); 
+                    intent.putExtra(EXTRA_TRACK, mCurrentTrack.getID()); 
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(</span><span class="s0">this</span><span class="s1">); 
+                    stackBuilder.addParentStack(TrackDetailActivity.</span><span class="s0">class</span><span class="s1">); 
+                    stackBuilder.addNextIntent(intent); 
+                    stackBuilder.startActivities(); 
+                } 
+                </span><span class="s0">else </span><span class="s1">{ 
+                    mCurrentTrack = mTrackService.startLogging(); 
+                    </span><span class="s0">for</span><span class="s1">(DashboardWidget widget : mWidgets){ 
+                        widget.setTrack(mCurrentTrack); 
+                    } 
+                } 
+                setRecording(!mRecording); 
+                </span><span class="s0">break</span><span class="s1">; 
+            </span><span class="s0">case </span><span class="s1">R.id.action_settings: 
+                startActivity(</span><span class="s0">new </span><span class="s1">Intent(</span><span class="s0">this</span><span class="s1">, SettingsActivity.</span><span class="s0">class</span><span class="s1">)); 
+                </span><span class="s0">break</span><span class="s1">; 
+            </span><span class="s0">default</span><span class="s1">: 
+                </span><span class="s0">return super</span><span class="s1">.onOptionsItemSelected(item); 
+        } 
+        </span><span class="s0">return super</span><span class="s1">.onOptionsItemSelected(item); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public boolean </span><span class="s1">onNavigationItemSelected(</span><span class="s0">int </span><span class="s1">position, </span><span class="s0">long </span><span class="s1">id) { 
+        </span><span class="s4">// When the given dropdown item is selected, show its contents in the</span><span class="s1"> 
+        </span><span class="s4">// container view.</span><span class="s1"> 
+        </span><span class="s0">if</span><span class="s1">(position == </span><span class="s3">1</span><span class="s1">){ 
+            Intent intent = </span><span class="s0">new </span><span class="s1">Intent(</span><span class="s0">this</span><span class="s1">, TrackListActivity.</span><span class="s0">class</span><span class="s1">); 
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+            startActivity(intent); 
+        } 
+        </span><span class="s0">return true</span><span class="s1">; 
+    } 
+ 
+    @Override 
+    </span><span class="s0">protected </span><span class="s1">Dialog onCreateDialog(</span><span class="s0">int </span><span class="s1">id) { 
+        </span><span class="s0">switch </span><span class="s1">(id){ 
+            </span><span class="s0">case </span><span class="s1">DIALOG_ADD: 
+                </span><span class="s0">return </span><span class="s1">createAddDialog(); 
+            </span><span class="s0">case </span><span class="s1">DIALOG_EDIT: 
+                </span><span class="s0">return </span><span class="s1">createEditDialog(); 
+        } 
+        </span><span class="s0">return super</span><span class="s1">.onCreateDialog(id); 
+    } 
+ 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onPrepareDialog(</span><span class="s0">int </span><span class="s1">id, Dialog dialog) { 
+        </span><span class="s0">switch </span><span class="s1">(id){ 
+            </span><span class="s0">case </span><span class="s1">DIALOG_ADD: 
+                prepareAddDialog(dialog); 
+                </span><span class="s0">break</span><span class="s1">; 
+            </span><span class="s0">case </span><span class="s1">DIALOG_EDIT: 
+                prepareEditDialog(dialog); 
+        } 
+        </span><span class="s0">super</span><span class="s1">.onPrepareDialog(id, dialog); 
+    } 
+ 
+ 
+    </span><span class="s0">private </span><span class="s1">ServiceConnection mConnection = </span><span class="s0">new </span><span class="s1">ServiceConnection() { 
+        </span><span class="s0">public void </span><span class="s1">onServiceConnected(ComponentName className, IBinder service) { 
+            </span><span class="s4">// This is called when the connection with the service has been</span><span class="s1"> 
+            </span><span class="s4">// established, giving us the service object we can use to</span><span class="s1"> 
+            </span><span class="s4">// interact with the service.  Because we have bound to a explicit</span><span class="s1"> 
+            </span><span class="s4">// service that we know is running in our own process, we can</span><span class="s1"> 
+            </span><span class="s4">// cast its IBinder to a concrete class and directly access it.</span><span class="s1"> 
+            mTrackService = ((TrackService.LocalBinder)service).getService(); 
+ 
+            setRecording(mTrackService.isRecording()); 
+ 
+            mCurrentTrack = mTrackService.getTrack(); 
+            </span><span class="s0">for</span><span class="s1">(DashboardWidget widget : mWidgets){ 
+                widget.setTrack(mCurrentTrack); 
+            } 
+ 
+            Log.d(LOG_TAG, </span><span class="s2">&quot;Service Connected&quot;</span><span class="s1">); 
+        } 
+ 
+        </span><span class="s0">public void </span><span class="s1">onServiceDisconnected(ComponentName className) { 
+            </span><span class="s4">// This is called when the connection with the service has been</span><span class="s1"> 
+            </span><span class="s4">// unexpectedly disconnected -- that is, its process crashed.</span><span class="s1"> 
+            </span><span class="s4">// Because it is running in our same process, we should never</span><span class="s1"> 
+            </span><span class="s4">// see this happen.</span><span class="s1"> 
+            mTrackService = </span><span class="s0">null</span><span class="s1">; 
+            Log.d(LOG_TAG, </span><span class="s2">&quot;Service Discconnected&quot;</span><span class="s1">); 
+        } 
+    }; 
+ 
+    </span><span class="s0">void </span><span class="s1">doBindService() { 
+        Intent intent = </span><span class="s0">new </span><span class="s1">Intent(</span><span class="s0">this</span><span class="s1">, TrackService.</span><span class="s0">class</span><span class="s1">); 
+        startService(intent); 
+        </span><span class="s4">// Establish a connection with the service.  We use an explicit</span><span class="s1"> 
+        </span><span class="s4">// class name because we want a specific service implementation that</span><span class="s1"> 
+        </span><span class="s4">// we know will be running in our own process (and thus won't be</span><span class="s1"> 
+        </span><span class="s4">// supporting component replacement by other applications).</span><span class="s1"> 
+        bindService(intent, mConnection, </span><span class="s3">0</span><span class="s1">); 
+        mIsBound = </span><span class="s0">true</span><span class="s1">; 
+        Log.d(LOG_TAG, </span><span class="s2">&quot;Service Bound&quot;</span><span class="s1">); 
+ 
+    } 
+ 
+    </span><span class="s0">void </span><span class="s1">doUnbindService() { 
+        </span><span class="s0">if </span><span class="s1">(mIsBound) { 
+            </span><span class="s4">// Detach our existing connection.</span><span class="s1"> 
+            unbindService(mConnection); 
+            mIsBound = </span><span class="s0">false</span><span class="s1">; 
+            Log.d(LOG_TAG, </span><span class="s2">&quot;Service Unbound&quot;</span><span class="s1">); 
+        } 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">setRecording(</span><span class="s0">boolean </span><span class="s1">recording) { 
+        </span><span class="s0">if</span><span class="s1">(mRecordItem != </span><span class="s0">null</span><span class="s1">){ 
+            </span><span class="s4">//AnimationDrawable icon = (AnimationDrawable)mRecordItem.getIcon();</span><span class="s1"> 
+            </span><span class="s0">if</span><span class="s1">(recording){ 
+                </span><span class="s4">//icon.start();</span><span class="s1"> 
+                mRecordItem.setIcon(R.drawable.ic_menu_pause); 
+            } 
+            </span><span class="s0">else </span><span class="s1">{ 
+                </span><span class="s4">//icon.stop();</span><span class="s1"> 
+                </span><span class="s4">// Set the animation back to the beginning</span><span class="s1"> 
+                </span><span class="s4">//mRecordItem.setIcon(null);</span><span class="s1"> 
+                mRecordItem.setIcon(R.drawable.ic_menu_record); 
+            } 
+        } 
+        mRecording = recording; 
+    } 
+ 
+    </span><span class="s0">private int </span><span class="s1">mDragStartIndex; 
+    </span><span class="s0">private int </span><span class="s1">mLastXTouch; 
+    </span><span class="s0">private int </span><span class="s1">mLastYTouch; 
+ 
+    </span><span class="s0">private </span><span class="s1">View.OnTouchListener mOnTouchListener = </span><span class="s0">new </span><span class="s1">View.OnTouchListener() { 
+        @Override 
+        </span><span class="s0">public boolean </span><span class="s1">onTouch(View v, MotionEvent event) { 
+            </span><span class="s0">final int </span><span class="s1">action = event.getAction(); 
+            </span><span class="s0">switch </span><span class="s1">(action &amp; MotionEvent.ACTION_MASK) { 
+                </span><span class="s0">case </span><span class="s1">MotionEvent.ACTION_DOWN: { 
+                    mLastXTouch = (</span><span class="s0">int</span><span class="s1">) event.getX(); 
+                    mLastYTouch = (</span><span class="s0">int</span><span class="s1">) event.getY(); 
+                    </span><span class="s0">break</span><span class="s1">; 
+                } 
+            } 
+            </span><span class="s0">return false</span><span class="s1">; 
+        } 
+    }; 
+ 
+    </span><span class="s0">private </span><span class="s1">View.OnLongClickListener mLongClickListener = </span><span class="s0">new </span><span class="s1">View.OnLongClickListener() { 
+        @Override 
+        </span><span class="s0">public boolean </span><span class="s1">onLongClick(View view) { 
+            </span><span class="s0">final </span><span class="s1">View _view = view; 
+ 
+            </span><span class="s0">if</span><span class="s1">(mActionMode != </span><span class="s0">null</span><span class="s1">){ 
+                mActionMode.finish(); 
+            } 
+ 
+            mDragStartIndex = mGridLayout.indexOfChild(view); 
+            mGridLayout.addView(mSpace, mDragStartIndex); 
+            </span><span class="s0">final float </span><span class="s1">scale = </span><span class="s3">1.2f</span><span class="s1">; 
+            </span><span class="s0">final int </span><span class="s1">viewWidth = _view.getWidth(), 
+                      viewHeight = _view.getHeight(), 
+                      shadowWidth = (</span><span class="s0">int</span><span class="s1">)Math.floor(viewWidth*scale), 
+                      shadowHeight = (</span><span class="s0">int</span><span class="s1">)Math.floor(viewHeight*scale), 
+                      dcx = (shadowWidth - viewWidth) / </span><span class="s3">2</span><span class="s1">, 
+                      dcy = (shadowHeight - viewHeight) / </span><span class="s3">2</span><span class="s1">; 
+            View.DragShadowBuilder dragShadowBuilder = </span><span class="s0">new </span><span class="s1">View.DragShadowBuilder(view){ 
+                @Override 
+                </span><span class="s0">public void </span><span class="s1">onProvideShadowMetrics(android.graphics.Point dimensions, android.graphics.Point touch_point){ 
+                    dimensions.x = shadowWidth; 
+                    dimensions.y = shadowHeight; 
+                    touch_point.x = mLastXTouch + dcx; 
+                    touch_point.y = mLastYTouch + dcy; 
+                } 
+ 
+                @Override 
+                </span><span class="s0">public void </span><span class="s1">onDrawShadow(Canvas canvas) { 
+                    canvas.scale(scale,scale); 
+                    </span><span class="s0">super</span><span class="s1">.onDrawShadow(canvas); 
+                } 
+            }; 
+            view.startDrag(</span><span class="s0">null</span><span class="s1">, dragShadowBuilder, view, </span><span class="s3">0</span><span class="s1">); 
+            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY); 
+            mGridLayout.removeView(view); 
+ 
+            </span><span class="s0">return true</span><span class="s1">; 
+        } 
+    }; 
+ 
+    </span><span class="s0">private </span><span class="s1">View.OnClickListener mClickListener = </span><span class="s0">new </span><span class="s1">View.OnClickListener() { 
+        @Override 
+        </span><span class="s0">public void </span><span class="s1">onClick(View view) { 
+            </span><span class="s0">if</span><span class="s1">(mActionMode != </span><span class="s0">null</span><span class="s1">){ 
+</span><span class="s4">//                mDragLayer.removeResizeFrame();</span><span class="s1"> 
+                </span><span class="s0">if</span><span class="s1">(view.isSelected()){ 
+                    view.setSelected(</span><span class="s0">false</span><span class="s1">); 
+                    mSelectedWidgets.remove(view); 
+                    </span><span class="s0">final int </span><span class="s1">selectedSize = mSelectedWidgets.size(); 
+                    </span><span class="s0">if</span><span class="s1">(selectedSize == </span><span class="s3">0</span><span class="s1">){ 
+                        mActionMode.finish(); 
+                    } 
+                    </span><span class="s0">else if</span><span class="s1">(selectedSize &gt; </span><span class="s3">1</span><span class="s1">){ 
+                        mEditItem.setVisible(</span><span class="s0">false</span><span class="s1">); 
+                    } 
+                    </span><span class="s0">else </span><span class="s1">{ 
+                        mEditItem.setVisible(</span><span class="s0">true</span><span class="s1">); 
+                    } 
+                } 
+                </span><span class="s0">else </span><span class="s1">{ 
+                    view.setSelected(</span><span class="s0">true</span><span class="s1">); 
+                    mSelectedWidgets.add((DashboardWidget) view); 
+                    mEditItem.setVisible(</span><span class="s0">false</span><span class="s1">); 
+                } 
+            } 
+            </span><span class="s0">else </span><span class="s1">{ 
+                </span><span class="s0">final </span><span class="s1">DashboardWidget widget = (DashboardWidget)view; 
+                </span><span class="s0">final int </span><span class="s1">type = widget.getWidgetType(); 
+                </span><span class="s0">final </span><span class="s1">WidgetTypesHelper.WidgetDescription widgetDescription = mWidgetTypesHelper.getWidget(type); 
+                </span><span class="s0">if</span><span class="s1">(widgetDescription != </span><span class="s0">null</span><span class="s1">){ 
+                    Toast.makeText(DashboardActivity.</span><span class="s0">this</span><span class="s1">, widgetDescription.name, Toast.LENGTH_SHORT).show(); 
+                } 
+            } 
+        } 
+    }; 
+ 
+    </span><span class="s0">private </span><span class="s1">View.OnDragListener mDragListener = </span><span class="s0">new </span><span class="s1">View.OnDragListener() { 
+        GridLayout.LayoutParams mParams; 
+        View mDraggedView; 
+        </span><span class="s0">int </span><span class="s1">mLastIndex; 
+ 
+        @Override 
+        </span><span class="s0">public boolean </span><span class="s1">onDrag(View v, DragEvent event) { 
+            </span><span class="s0">final int </span><span class="s1">action = event.getAction(); 
+ 
+            </span><span class="s0">switch </span><span class="s1">(action){ 
+                </span><span class="s0">case </span><span class="s1">DragEvent.ACTION_DRAG_STARTED: 
+ 
+                    </span><span class="s0">if</span><span class="s1">(mParams == </span><span class="s0">null</span><span class="s1">){ 
+                        mDraggedView = (View)event.getLocalState(); 
+                        mParams = (GridLayout.LayoutParams)mDraggedView.getLayoutParams(); 
+                        mSpace.setLayoutParams(mParams); 
+                        mLastIndex = mDragStartIndex; 
+                    } 
+ 
+                    </span><span class="s0">return true</span><span class="s1">; 
+ 
+                </span><span class="s0">case </span><span class="s1">DragEvent.ACTION_DRAG_ENTERED: 
+ 
+                    </span><span class="s0">if</span><span class="s1">(!v.equals(mSpace)){ 
+                        </span><span class="s0">final int </span><span class="s1">index = mGridLayout.indexOfChild(v); 
+                        mGridLayout.removeView(mSpace); 
+                        mGridLayout.addView(mSpace, index); 
+                        v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY); 
+                        mLastIndex = index; 
+                    } 
+ 
+                    </span><span class="s0">break</span><span class="s1">; 
+ 
+                </span><span class="s0">case </span><span class="s1">DragEvent.ACTION_DRAG_EXITED: 
+                    </span><span class="s0">break</span><span class="s1">; 
+ 
+                </span><span class="s0">case </span><span class="s1">DragEvent.ACTION_DROP: 
+                    </span><span class="s4">// Insert dragged view before this view</span><span class="s1"> 
+                    mGridLayout.removeView(mSpace); 
+                    mGridLayout.addView(mDraggedView, mLastIndex); 
+ 
+                    </span><span class="s0">return true</span><span class="s1">; 
+ 
+                </span><span class="s0">case </span><span class="s1">DragEvent.ACTION_DRAG_ENDED: 
+ 
+                    </span><span class="s4">// mParams is our handy marker object, making sure things only happen once!</span><span class="s1"> 
+                    </span><span class="s0">if</span><span class="s1">(mParams != </span><span class="s0">null</span><span class="s1">){ 
+ 
+ 
+                        </span><span class="s4">// If dragging was cancelled just drop the view where it last was</span><span class="s1"> 
+                        </span><span class="s4">// so that it is not lost or leaked</span><span class="s1"> 
+                        </span><span class="s0">if</span><span class="s1">(!event.getResult()){ 
+                            mGridLayout.addView(mDraggedView, mLastIndex); 
+                        } 
+ 
+                        saveWidgets(); 
+ 
+                        </span><span class="s0">if </span><span class="s1">(mActionMode == </span><span class="s0">null</span><span class="s1">) { 
+ 
+                            </span><span class="s4">// Start the CAB using the ActionMode.Callback defined above</span><span class="s1"> 
+                            mActionMode = startActionMode(mActionModeCallback); 
+                            mDraggedView.setSelected(</span><span class="s0">true</span><span class="s1">); 
+                            mSelectedWidgets.add((DashboardWidget) mDraggedView); 
+ 
+</span><span class="s4">//                            if(mSelectedWidgets.size() == 1){</span><span class="s1"> 
+</span><span class="s4">//                                mDragLayer.addResizeFrame(mSelectedWidgets.get(0), mGridLayout);</span><span class="s1"> 
+</span><span class="s4">//                            }</span><span class="s1"> 
+                        } 
+ 
+                        </span><span class="s4">// clean up mParams so that they can be re-set at the next drag event;</span><span class="s1"> 
+                        mParams = </span><span class="s0">null</span><span class="s1">; 
+                    } 
+            } 
+            </span><span class="s0">return false</span><span class="s1">; 
+        } 
+    }; 
+ 
+    </span><span class="s0">private </span><span class="s1">ActionMode.Callback mActionModeCallback = </span><span class="s0">new </span><span class="s1">ActionMode.Callback() { 
+ 
+        </span><span class="s4">// Called when the action mode is created; startActionMode() was called</span><span class="s1"> 
+        @Override 
+        </span><span class="s0">public boolean </span><span class="s1">onCreateActionMode(ActionMode mode, Menu menu) { 
+            </span><span class="s4">// Inflate a menu resource providing context menu items</span><span class="s1"> 
+            MenuInflater inflater = mode.getMenuInflater(); 
+            inflater.inflate(R.menu.action_menu, menu); 
+            mEditItem = menu.findItem(R.id.action_edit); 
+            </span><span class="s0">return true</span><span class="s1">; 
+        } 
+ 
+        </span><span class="s4">// Called each time the action mode is shown. Always called after onCreateActionMode, but</span><span class="s1"> 
+        </span><span class="s4">// may be called multiple times if the mode is java.lang.Objectinvalidated.</span><span class="s1"> 
+        @Override 
+        </span><span class="s0">public boolean </span><span class="s1">onPrepareActionMode(ActionMode mode, Menu menu) { 
+</span><span class="s4">//            for(DashboardWidget widget : mWidgets){</span><span class="s1"> 
+</span><span class="s4">//                widget.setClickable(true);</span><span class="s1"> 
+</span><span class="s4">//            }</span><span class="s1"> 
+            </span><span class="s0">return false</span><span class="s1">; </span><span class="s4">// Return false if nothing is done</span><span class="s1"> 
+        } 
+ 
+        </span><span class="s4">// Called when the user selects a contextual menu item</span><span class="s1"> 
+        @Override 
+        </span><span class="s0">public boolean </span><span class="s1">onActionItemClicked(ActionMode mode, MenuItem item) { 
+            </span><span class="s0">switch </span><span class="s1">(item.getItemId()) { 
+                </span><span class="s0">case </span><span class="s1">R.id.action_edit: 
+</span><span class="s4">//                    Intent intent = new Intent(DashboardActivity.this, EditWidgetDialog.class);</span><span class="s1"> 
+</span><span class="s4">//                    intent.putExtra(EXTRA_ROWS, 1);</span><span class="s1"> 
+</span><span class="s4">//                    intent.putExtra(EXTRA_COLS, 1);</span><span class="s1"> 
+</span><span class="s4">//                    intent.putExtra(EXTRA_UNITS, 0);</span><span class="s1"> 
+</span><span class="s4">//                    startActivityForResult(intent, R.id.action_edit);</span><span class="s1"> 
+                    showDialog(DIALOG_EDIT); 
+                    </span><span class="s0">return true</span><span class="s1">; 
+                </span><span class="s0">case </span><span class="s1">R.id.action_delete: 
+                    deleteSelectedItems(); 
+                    mode.finish(); </span><span class="s4">// Action picked, so close the CAB</span><span class="s1"> 
+                    </span><span class="s0">return true</span><span class="s1">; 
+                </span><span class="s0">default</span><span class="s1">: 
+                    </span><span class="s0">return false</span><span class="s1">; 
+            } 
+        } 
+ 
+        </span><span class="s4">// Called when the user exits the action mode</span><span class="s1"> 
+        @Override 
+        </span><span class="s0">public void </span><span class="s1">onDestroyActionMode(ActionMode mode) { 
+            mActionMode = </span><span class="s0">null</span><span class="s1">; 
+            </span><span class="s0">for</span><span class="s1">(DashboardWidget widget : mSelectedWidgets){ 
+                </span><span class="s4">//widget.setClickable(false);</span><span class="s1"> 
+                widget.setSelected(</span><span class="s0">false</span><span class="s1">); 
+            } 
+            mSelectedWidgets.clear(); 
+        } 
+    }; 
+ 
+    </span><span class="s0">private void </span><span class="s1">saveWidgets(){ 
+        SQLiteDatabase db = mDatabase.getWritableDatabase(); 
+        db.beginTransaction(); 
+ 
+        </span><span class="s0">try </span><span class="s1">{ 
+            db.delete(DatabaseHelper.WIDGET_TABLE_NAME, </span><span class="s0">null</span><span class="s1">, </span><span class="s0">null</span><span class="s1">); 
+ 
+            ContentValues values; 
+            DashboardWidget widget; 
+ 
+            </span><span class="s0">int </span><span class="s1">i = </span><span class="s3">0</span><span class="s1">; 
+            </span><span class="s0">int </span><span class="s1">l = mGridLayout.getChildCount(); 
+            </span><span class="s0">for</span><span class="s1">(;i&lt;l;i++){ 
+                </span><span class="s0">try </span><span class="s1">{ 
+                    widget = (DashboardWidget)mGridLayout.getChildAt(i); 
+                    values = </span><span class="s0">new </span><span class="s1">ContentValues(); 
+                    values.put(DatabaseHelper.ORDER_COLUMN, i); 
+                    values.put(DatabaseHelper.TYPE_COLUMN, widget.getWidgetType()); 
+                    values.put(DatabaseHelper.WIDTH_COLUMN, getWidgetColsSpan(widget)); 
+                    values.put(DatabaseHelper.HEIGHT_COLUMN, getWidgetRowsSpan(widget)); 
+                    values.put(DatabaseHelper.UNITS_COLUMN, widget.getUnits()); 
+                    db.insert(DatabaseHelper.WIDGET_TABLE_NAME, DatabaseHelper.ID_COLUMN, values); 
+                } </span><span class="s0">catch </span><span class="s1">(ClassCastException e){} 
+            } 
+ 
+            db.setTransactionSuccessful(); 
+        } 
+        </span><span class="s0">finally </span><span class="s1">{ 
+            db.endTransaction(); 
+ 
+            db.close(); 
+        } 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">loadWidgets(){ 
+        mWidgets.clear(); 
+        mGridLayout.removeAllViews(); 
+ 
+        SQLiteDatabase db = mDatabase.getReadableDatabase(); 
+        Cursor cursor = db.query(DatabaseHelper.WIDGET_TABLE_NAME, </span><span class="s0">new </span><span class="s1">String[]{ 
+                DatabaseHelper.TYPE_COLUMN, 
+                DatabaseHelper.WIDTH_COLUMN, 
+                DatabaseHelper.HEIGHT_COLUMN, 
+                DatabaseHelper.UNITS_COLUMN 
+        }, </span><span class="s0">null</span><span class="s1">, </span><span class="s0">null</span><span class="s1">, </span><span class="s0">null</span><span class="s1">, </span><span class="s0">null</span><span class="s1">, DatabaseHelper.ORDER_COLUMN); 
+ 
+        </span><span class="s0">while</span><span class="s1">(cursor.moveToNext()){ 
+            </span><span class="s0">int </span><span class="s1">type = cursor.getInt(</span><span class="s3">0</span><span class="s1">); 
+            </span><span class="s0">int </span><span class="s1">colSpan = cursor.getInt(</span><span class="s3">1</span><span class="s1">); 
+            </span><span class="s0">int </span><span class="s1">rowSpan = cursor.getInt(</span><span class="s3">2</span><span class="s1">); 
+            </span><span class="s0">int </span><span class="s1">units = cursor.getInt(</span><span class="s3">3</span><span class="s1">); 
+ 
+            addWidget(type, colSpan, rowSpan, units); 
+        } 
+    } 
+    </span><span class="s0">public void </span><span class="s1">addWidget(</span><span class="s0">int </span><span class="s1">type){ 
+        addWidget(type, </span><span class="s3">1</span><span class="s1">, </span><span class="s3">1</span><span class="s1">); 
+        saveWidgets(); 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">addWidget(</span><span class="s0">int </span><span class="s1">type, </span><span class="s0">int </span><span class="s1">colSpan, </span><span class="s0">int </span><span class="s1">rowSpan){ 
+        addWidget(type, colSpan, rowSpan, DashboardWidget.UNITS_DEFAULT); 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">addWidget(</span><span class="s0">int </span><span class="s1">widgetType, </span><span class="s0">int </span><span class="s1">colSpan, </span><span class="s0">int </span><span class="s1">rowSpan, </span><span class="s0">int </span><span class="s1">unitsType) { 
+ 
+        DashboardWidget widget = DashboardWidget.WidgetFactory(</span><span class="s0">this</span><span class="s1">, widgetType, unitsType); 
+ 
+        GridLayout.Spec colSpec = GridLayout.spec(GridLayout.UNDEFINED, colSpan); 
+        GridLayout.Spec rowSpec = GridLayout.spec(GridLayout.UNDEFINED, rowSpan); 
+        GridLayout.LayoutParams params = </span><span class="s0">new </span><span class="s1">GridLayout.LayoutParams(rowSpec, colSpec); 
+        params.width = mWidgetWidth * colSpan; 
+        params.height = mWidgetHeight * rowSpan; 
+ 
+        Log.d(LOG_TAG, </span><span class="s2">&quot;Widget Added: &quot; </span><span class="s1">+ widgetType + </span><span class="s2">&quot; (&quot; </span><span class="s1">+ colSpan + </span><span class="s2">&quot; x &quot; </span><span class="s1">+ rowSpan + </span><span class="s2">&quot;)&quot;</span><span class="s1">); 
+ 
+        widget.setLayoutParams(params); 
+ 
+        widget.setOnTouchListener(mOnTouchListener); 
+        widget.setOnLongClickListener(mLongClickListener); 
+        widget.setOnClickListener(mClickListener); 
+        widget.setOnDragListener(mDragListener); 
+        widget.setLongClickable(</span><span class="s0">true</span><span class="s1">); 
+        widget.setClickable(</span><span class="s0">false</span><span class="s1">); 
+ 
+        </span><span class="s0">if</span><span class="s1">(mCurrentTrack != </span><span class="s0">null</span><span class="s1">){ 
+            widget.setTrack(mCurrentTrack); 
+        } 
+ 
+        mWidgets.add(widget); 
+        mGridLayout.addView(widget); 
+ 
+        widget.onResume(); 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">deleteSelectedItems(){ 
+        </span><span class="s0">for</span><span class="s1">(DashboardWidget widget : mSelectedWidgets){ 
+            mWidgets.remove(widget); 
+            mGridLayout.removeView(widget); 
+            widget.destroy(); 
+        } 
+        mSelectedWidgets.clear(); 
+ 
+        </span><span class="s4">// Now save current configuration</span><span class="s1"> 
+        saveWidgets(); 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">addDefaultWidgets() { 
+        addWidget(DashboardWidget.WIDGET_SPEED, </span><span class="s3">2</span><span class="s1">, </span><span class="s3">2</span><span class="s1">); 
+        addWidget(DashboardWidget.WIDGET_LATITUDE); 
+        addWidget(DashboardWidget.WIDGET_LONGITUDE); 
+        addWidget(DashboardWidget.WIDGET_HEADING); 
+        addWidget(DashboardWidget.WIDGET_BATTERY_LEVEL); 
+        addWidget(DashboardWidget.WIDGET_ACCURACY); 
+        addWidget(DashboardWidget.WIDGET_SPEED, </span><span class="s3">1</span><span class="s1">, </span><span class="s3">1</span><span class="s1">, DashboardWidget.UNITS_IMPERIAL); 
+        addWidget(DashboardWidget.WIDGET_SPEED, </span><span class="s3">1</span><span class="s1">, </span><span class="s3">1</span><span class="s1">, DashboardWidget.UNITS_SI); 
+        addWidget(DashboardWidget.WIDGET_ALTITUDE); 
+ 
+        saveWidgets(); 
+    } 
+ 
+    </span><span class="s0">private int </span><span class="s1">getWidgetColsSpan(DashboardWidget widget){ 
+        </span><span class="s0">return </span><span class="s1">widget.getLayoutParams().width / mWidgetWidth; 
+    } 
+ 
+    </span><span class="s0">private int </span><span class="s1">getWidgetRowsSpan(DashboardWidget widget){ 
+        </span><span class="s0">return </span><span class="s1">widget.getLayoutParams().height / mWidgetHeight; 
+    } 
+ 
+ 
+    </span><span class="s0">private </span><span class="s1">Dialog createEditDialog(){ 
+        </span><span class="s0">final </span><span class="s1">Dialog dialog = </span><span class="s0">new </span><span class="s1">Dialog(</span><span class="s0">this</span><span class="s1">, android.R.style.Theme_Holo_Light_Dialog); 
+        dialog.setContentView(R.layout.widget_edit); 
+        dialog.setTitle(R.string.edit_widget_title); 
+ 
+        </span><span class="s0">final </span><span class="s1">NumberPicker colsPicker = (NumberPicker)dialog.findViewById(R.id.picker_cols); 
+        colsPicker.setMaxValue(</span><span class="s3">10</span><span class="s1">); 
+ 
+        </span><span class="s0">final </span><span class="s1">NumberPicker rowsPicker = (NumberPicker)dialog.findViewById(R.id.picker_rows); 
+        rowsPicker.setMaxValue(</span><span class="s3">10</span><span class="s1">); 
+ 
+        Button discardButton = (Button)dialog.findViewById(R.id.button_discard); 
+        discardButton.setOnClickListener(</span><span class="s0">new </span><span class="s1">View.OnClickListener() { 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">onClick(View v) { 
+                </span><span class="s0">if </span><span class="s1">(mActionMode != </span><span class="s0">null</span><span class="s1">) { 
+                    mActionMode.finish(); 
+                } 
+                dialog.dismiss(); 
+            } 
+        }); 
+ 
+        </span><span class="s0">return </span><span class="s1">dialog; 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">prepareEditDialog(</span><span class="s0">final </span><span class="s1">Dialog dialog){ 
+        </span><span class="s0">if</span><span class="s1">(mSelectedWidgets.size() == </span><span class="s3">0</span><span class="s1">){ 
+            dialog.dismiss(); 
+            </span><span class="s0">return</span><span class="s1">; 
+        } 
+        </span><span class="s0">final </span><span class="s1">DashboardWidget widget = mSelectedWidgets.get(</span><span class="s3">0</span><span class="s1">); 
+ 
+        </span><span class="s0">final </span><span class="s1">NumberPicker colsPicker = (NumberPicker)dialog.findViewById(R.id.picker_cols); 
+        colsPicker.setMaxValue(</span><span class="s3">10</span><span class="s1">); 
+        colsPicker.setValue(getWidgetColsSpan(widget)); 
+ 
+        </span><span class="s0">final </span><span class="s1">NumberPicker rowsPicker = (NumberPicker)dialog.findViewById(R.id.picker_rows); 
+        rowsPicker.setMaxValue(</span><span class="s3">10</span><span class="s1">); 
+        rowsPicker.setValue(getWidgetRowsSpan(widget)); 
+ 
+        </span><span class="s0">final </span><span class="s1">Spinner unitsSpinner = (Spinner)dialog.findViewById(R.id.spinner_units); 
+        unitsSpinner.setSelection(widget.getUnits()); 
+ 
+        Button doneButton = (Button)dialog.findViewById(R.id.button_done); 
+        doneButton.setOnClickListener(</span><span class="s0">new </span><span class="s1">View.OnClickListener(){ 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">onClick(View v) { 
+ 
+                GridLayout.LayoutParams params = (GridLayout.LayoutParams)widget.getLayoutParams(); 
+                </span><span class="s0">int </span><span class="s1">colsSpan = colsPicker.getValue(); 
+                </span><span class="s0">int </span><span class="s1">rowsSpan = rowsPicker.getValue(); 
+                params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, colsSpan); 
+                params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED, rowsSpan); 
+                params.width = mWidgetWidth * colsSpan; 
+                params.height = mWidgetHeight * rowsSpan; 
+                widget.setUnits(unitsSpinner.getSelectedItemPosition()); 
+                saveWidgets(); 
+                </span><span class="s0">if</span><span class="s1">(mActionMode != </span><span class="s0">null</span><span class="s1">){ 
+                    mActionMode.finish(); 
+                } 
+                dialog.dismiss(); 
+            } 
+        }); 
+    } 
+    </span><span class="s0">private </span><span class="s1">Dialog createAddDialog() { 
+        </span><span class="s0">return new </span><span class="s1">AddWidgetDialog(</span><span class="s0">this</span><span class="s1">); 
+    } 
+    </span><span class="s0">private void </span><span class="s1">prepareAddDialog(Dialog dialog) { 
+ 
+    } 
+} 
+</span></pre>
+</body>
+</html>

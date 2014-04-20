@@ -4,7 +4,13 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
-        <option name="externalProjectPath" value="E:\Code\GPSToolsMobile-gradle" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="E:\Code\GPSToolsMobile-gradle" />
+            <option value="E:\Code\GPSToolsMobile-gradle\GPSTools" />
+          </set>
+        </option>
       </GradleProjectSettings>
     </option>
   </component>
