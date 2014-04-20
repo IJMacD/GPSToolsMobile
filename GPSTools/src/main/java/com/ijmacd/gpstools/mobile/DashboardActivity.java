@@ -562,6 +562,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
                         mDraggedView = (View)event.getLocalState();
                         mParams = (GridLayout.LayoutParams)mDraggedView.getLayoutParams();
                         mSpace.setLayoutParams(mParams);
+                        v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                         mLastIndex = mDragStartIndex;
                     }
 
@@ -573,7 +574,6 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
                         final int index = mGridLayout.indexOfChild(v);
                         mGridLayout.removeView(mSpace);
                         mGridLayout.addView(mSpace, index);
-                        v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                         mLastIndex = index;
                     }
 
