@@ -43,6 +43,12 @@
         <category>gps</category>
     </widget>
     <widget>
+        <name>Heading</name>
+        <description>The current heading of the device</description>
+        <type>18</type>
+        <category>gps</category>
+    </widget>
+    <widget>
         <name>Altitude</name>
         <description>The current altitude</description>
         <type>7</type>
