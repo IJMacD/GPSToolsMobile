@@ -152,10 +152,13 @@ public class TrackListActivity extends ActionBarActivity implements ActionBar.On
         });
 
 
-        mTitle = mDrawerTitle = getTitle();
+        mTitle = getTitle();
+        mDrawerTitle = "GPSTools";
 
         // Set up the action bar to show a dropdown list.
         final ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
         final String[] navigationLabels = getResources().getStringArray(R.array.navigation_labels);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -185,7 +188,7 @@ public class TrackListActivity extends ActionBarActivity implements ActionBar.On
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(false);
         getActionBar().setHomeButtonEnabled(true);
 
     }

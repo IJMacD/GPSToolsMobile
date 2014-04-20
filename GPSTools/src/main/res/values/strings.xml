@@ -73,4 +73,6 @@
     <string name="pref_orientation_key">pref_orientation</string>
     <string name="drawer_open">Drawer Open</string>
     <string name="drawer_close">Drawer close</string>
+    <string name="activity_tracks">Tracks</string>
+    <string name="activity_track">Track</string>
 </resources>
