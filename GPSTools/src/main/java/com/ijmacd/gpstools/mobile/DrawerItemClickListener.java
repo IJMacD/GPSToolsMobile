@@ -13,7 +13,8 @@ public class DrawerItemClickListener implements android.widget.AdapterView.OnIte
     private final DrawerLayout mDrawerLayout;
     private static final Class[] Activities = new Class[]{
             DashboardActivity.class,
-            TrackListActivity.class
+            TrackListActivity.class,
+            BLEActivity.class
     };
 
     public DrawerItemClickListener(Activity activity, DrawerLayout drawerLayout) {

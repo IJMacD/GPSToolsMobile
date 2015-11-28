@@ -57,6 +57,7 @@ public class GPXExport {
                 final float lon = cursor.getFloat(cursor.getColumnIndex(DatabaseHelper.LON_COLUMN));
                 final float ele = cursor.getFloat(cursor.getColumnIndex(DatabaseHelper.ALTITUDE_COLUMN));
                 final long time = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.DATE_COLUMN));
+                final double cadence = cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.CSC_CADENCE_COLUMN));
                 final Date date = new Date(time);
 
                 if(startDate == null){
@@ -76,6 +77,14 @@ public class GPXExport {
                 Element timeElement = document.createElementNS(ns, "time");
                 timeElement.appendChild(document.createTextNode(formatter.format(date)));
                 trackPointElement.appendChild(timeElement);
+
+                Element extensionsElement = document.createElementNS(ns, "extensions");
+
+                Element cadenceElement = document.createElementNS(ns, "cadence");
+                cadenceElement.appendChild(document.createTextNode(String.valueOf(cadence)));
+
+                extensionsElement.appendChild(cadenceElement);
+                trackPointElement.appendChild(extensionsElement);
             }
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();

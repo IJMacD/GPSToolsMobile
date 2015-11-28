@@ -7,8 +7,15 @@
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="19" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
 
     <application
         android:allowBackup="true"
@@ -18,7 +25,7 @@
         <activity
             android:name=".DashboardActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,6 +40,7 @@
             android:name=".TrackDetailActivity"
             android:label="@string/activity_track"
             android:parentActivityName=".TrackListActivity" >
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -42,8 +50,24 @@
             android:name=".SettingsActivity"
             android:label="@string/app_name" >
         </activity>
+
+        <service android:name=".TrackService" >
+        </service>
+
+        <activity
+            android:name=".BLEActivity"
+            android:label="@string/title_activity_ble" >
+        </activity>
+
+        <activity
+            android:name=".DeviceControlActivity"
+            android:label="@string/title_activity_ble" >
+        </activity>
+
         <service
-            android:name=".TrackService"  >
+            android:name=".BluetoothLeService"
+            android:enabled="true"
+            android:exported="true" >
         </service>
     </application>
 

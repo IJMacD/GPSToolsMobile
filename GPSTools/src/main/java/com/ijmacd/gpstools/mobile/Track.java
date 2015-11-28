@@ -162,6 +162,8 @@ public class Track {
             cv.put(DatabaseHelper.ACCURACY_COLUMN, point.getAccuracy());
             cv.put(DatabaseHelper.SPEED_COLUMN, point.getSpeed());
             cv.put(DatabaseHelper.HEADING_COLUMN, point.getHeading());
+            cv.put(DatabaseHelper.CSC_SPEED_COLUMN, point.getSensorSpeed());
+            cv.put(DatabaseHelper.CSC_CADENCE_COLUMN, point.getCadence());
             db.insert(DatabaseHelper.TRACKPOINT_TABLE_NAME, DatabaseHelper.TRACK_ID_COLUMN, cv);
         }
         updateDatabaseTrack(db);
@@ -212,7 +214,8 @@ public class Track {
                         DatabaseHelper.DATE_COLUMN,
                         DatabaseHelper.LAT_COLUMN,
                         DatabaseHelper.LON_COLUMN,
-                        DatabaseHelper.ALTITUDE_COLUMN
+                        DatabaseHelper.ALTITUDE_COLUMN,
+                        DatabaseHelper.CSC_CADENCE_COLUMN
                 },
                 DatabaseHelper.TRACK_ID_COLUMN + " = ?",
                 new String[]{ String.valueOf(mTrackId) },

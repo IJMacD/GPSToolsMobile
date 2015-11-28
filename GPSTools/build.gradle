@@ -3,18 +3,19 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:1.1.0'
     }
 }
 apply plugin: 'android'
 
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.0"
+    buildToolsVersion '19.1.0'
 
     defaultConfig {
         minSdkVersion 14
@@ -22,18 +23,15 @@ android {
     }
     buildTypes {
         release {
-            runProguard true
             proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
         }
     }
     productFlavors {
-        defaultFlavor {
-            proguardFile 'proguard-rules.txt'
-        }
     }
 }
 
 dependencies {
-	compile 'com.android.support:gridlayout-v7:19.0.0'
-	compile 'com.android.support:appcompat-v7:19.0.0'
+    compile 'com.android.support:gridlayout-v7:19.0.0'
+    compile 'com.android.support:appcompat-v7:19.0.0'
+    compile 'com.github.movisens:SmartGattLib:1.7'
 }

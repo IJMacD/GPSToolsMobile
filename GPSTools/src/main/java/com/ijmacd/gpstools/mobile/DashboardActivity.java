@@ -1,10 +1,17 @@
 package com.ijmacd.gpstools.mobile;
 
+import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.app.TaskStackBuilder;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -12,6 +19,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
+import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -38,7 +46,11 @@ import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.movisens.smartgattlib.Characteristic;
+import com.movisens.smartgattlib.Descriptor;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class DashboardActivity extends ActionBarActivity implements ActionBar.OnNavigationListener {
 
@@ -248,6 +260,8 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         for(DashboardWidget widget : mWidgets){
             widget.onPause();
         }
+
+        unregisterReceiver(mGattUpdateReceiver);
     }
 
     @Override
@@ -263,6 +277,12 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
         for(DashboardWidget widget : mWidgets){
             widget.onResume();
+        }
+
+        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+        if (mBluetoothLeService != null) {
+            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
+            Log.d(LOG_TAG, "Connect request result=" + result);
         }
     }
 
@@ -322,10 +342,11 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
                     mTrackService.stopLogging();
                     Intent intent = new Intent(this, TrackDetailActivity.class);
                     intent.putExtra(EXTRA_TRACK, mCurrentTrack.getID());
-                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-                    stackBuilder.addParentStack(TrackDetailActivity.class);
-                    stackBuilder.addNextIntent(intent);
-                    stackBuilder.startActivities();
+//                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+//                    stackBuilder.addParentStack(TrackDetailActivity.class);
+//                    stackBuilder.addNextIntent(intent);
+//                    stackBuilder.startActivities();
+                    startActivity(intent);
                 }
                 else {
                     mCurrentTrack = mTrackService.startLogging();
@@ -415,7 +436,10 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         // supporting component replacement by other applications).
         bindService(intent, mConnection, 0);
         mIsBound = true;
-        Log.d(LOG_TAG, "Service Bound");
+        Log.d(LOG_TAG, "Track Service Bound");
+
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 
     }
 
@@ -425,8 +449,80 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
             unbindService(mConnection);
             mIsBound = false;
             Log.d(LOG_TAG, "Service Unbound");
+
+            unbindService(mServiceConnection);
+            mBluetoothLeService = null;
         }
     }
+
+    private BluetoothLeService mBluetoothLeService;
+
+    private String mDeviceAddress = "C9:DC:71:75:48:B7";
+    // Code to manage Service lifecycle.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e(LOG_TAG, "Unable to initialize Bluetooth");
+                finish();
+            }
+            // Automatically connects to the device upon successful start-up initialization.
+            mBluetoothLeService.connect(mDeviceAddress);
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
+
+    // Handles various events fired by the Service.
+    // ACTION_GATT_CONNECTED: connected to a GATT server.
+    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+    // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
+    //                        or notification operations.
+    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+//                mConnected = true;
+//                updateConnectionState(R.string.connected);
+//                invalidateOptionsMenu();
+                Log.d(LOG_TAG, "BLE Connected");
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+//                mConnected = false;
+//                updateConnectionState(R.string.disconnected);
+//                invalidateOptionsMenu();
+//                clearUI();
+                Log.d(LOG_TAG, "BLE Disconnected");
+            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                // Show all the supported services and characteristics on the user interface.
+//                displayGattServices(mBluetoothLeService.getSupportedGattServices());
+                Log.d(LOG_TAG, "BLE Discovered services");
+
+                List<BluetoothGattService> services = mBluetoothLeService.getSupportedGattServices();
+                for(BluetoothGattService service : services){
+                    BluetoothGattCharacteristic chara = service.getCharacteristic(Characteristic.CSC_MEASUREMENT);
+                    if(chara != null){
+                        mBluetoothLeService.setCharacteristicNotification(chara, true);
+                        Log.d(LOG_TAG, "Set Characteristic Notification");
+                        break;
+                    }
+                }
+
+
+            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+//                displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+               // Log.d(LOG_TAG, "BLE Data: " + intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+            }
+        }
+    };
 
     private void setRecording(boolean recording) {
         if(mRecordItem != null){
@@ -467,7 +563,6 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     private View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View view) {
-            final View _view = view;
 
             if(mActionMode != null){
                 mActionMode.finish();
@@ -475,9 +570,9 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
             mDragStartIndex = mGridLayout.indexOfChild(view);
             mGridLayout.addView(mSpace, mDragStartIndex);
-            final float scale = 1.2f;
-            final int viewWidth = _view.getWidth(),
-                      viewHeight = _view.getHeight(),
+            final float scale = 1.1f;
+            final int viewWidth = view.getWidth(),
+                      viewHeight = view.getHeight(),
                       shadowWidth = (int)Math.floor(viewWidth*scale),
                       shadowHeight = (int)Math.floor(viewHeight*scale),
                       dcx = (shadowWidth - viewWidth) / 2,
@@ -877,5 +972,14 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     }
     private void prepareAddDialog(Dialog dialog) {
 
+    }
+
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        return intentFilter;
     }
 }

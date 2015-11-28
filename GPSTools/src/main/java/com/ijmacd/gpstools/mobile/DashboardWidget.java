@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -86,6 +87,8 @@ public class DashboardWidget extends FrameLayout
     public static final int WIDGET_ACCELERATION = 165;
     public static final int WIDGET_GRAVITY = 166;
     public static final int WIDGET_LINEAR_ACCELERATION = 167;
+    public static final int WIDGET_CSC_SPEED = 168;
+    public static final int WIDGET_CSC_CADENCE = 169;
 
     public static final int UNITS_DEFAULT = 0;
     public static final int UNITS_METRIC = 1;
@@ -328,6 +331,7 @@ public class DashboardWidget extends FrameLayout
             switch (mWidgetType){
                 case WIDGET_SPEED:
                 case WIDGET_SPEED_AVERAGE:
+                case WIDGET_CSC_SPEED:
                     values = res.getStringArray(R.array.units_speed);
                     break;
                 case WIDGET_DISTANCE:
@@ -365,6 +369,7 @@ public class DashboardWidget extends FrameLayout
             switch(mWidgetType){
                 case WIDGET_SPEED:
                 case WIDGET_SPEED_AVERAGE:
+                case WIDGET_CSC_SPEED:
                     mValueFormat = "%.1f";
                     break;
                 case WIDGET_LATITUDE:
@@ -438,6 +443,7 @@ public class DashboardWidget extends FrameLayout
             switch (mWidgetType){
                 case WIDGET_SPEED:
                 case WIDGET_SPEED_AVERAGE:
+                case WIDGET_CSC_SPEED:
                         values = res.obtainTypedArray(R.array.unit_conversion_speed);
                     break;
                 case WIDGET_DISTANCE:
@@ -512,6 +518,9 @@ public class DashboardWidget extends FrameLayout
             case WIDGET_GRAVITY:
             case WIDGET_LINEAR_ACCELERATION:
                 return new SensorWidget(context, widgetType);
+            case WIDGET_CSC_SPEED:
+            case WIDGET_CSC_CADENCE:
+                return new CscWidget(context, widgetType);
             default:
                 return new DashboardWidget(context, widgetType, unitsType);
         }
@@ -902,6 +911,80 @@ public class DashboardWidget extends FrameLayout
         public void onPause() {
             super.onPause();
             mSensorManager.unregisterListener(mListener);
+        }
+    }
+
+    static class CscWidget extends DashboardWidget {
+        private final Context mContext;
+        private final int mWidgetType;
+        private double mLastSensorSpeed;
+        private double mLastCadence;
+
+        public CscWidget(Context context, int widgetType) {
+            super(context, widgetType);
+            mContext = context;
+            mWidgetType = widgetType;
+
+            if(mWidgetType == WIDGET_CSC_CADENCE){
+                setUnitsText("rpm");
+            }
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            mContext.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            mContext.unregisterReceiver(mGattUpdateReceiver);
+        }
+
+        // Handles various events fired by the Service.
+        // ACTION_GATT_CONNECTED: connected to a GATT server.
+        // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+        // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+        // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
+        //                        or notification operations.
+        private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+//                    Log.d(LOG_TAG, "BLE Connected");
+                } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+//                    Log.d(LOG_TAG, "BLE Disconnected");
+                    mLastSensorSpeed = 0;
+                    mLastCadence = 0;
+                } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+//                    Log.d(LOG_TAG, "BLE Discovered services");
+                } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+//                Log.d(LOG_TAG, "BLE Data: " + intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+                    mLastSensorSpeed = intent.getDoubleExtra(BluetoothLeService.EXTRA_SPEED, 0);
+                    mLastCadence = intent.getDoubleExtra(BluetoothLeService.EXTRA_CADENCE, 0);
+//                    Log.d(LOG_TAG, "Speed: " + mLastSensorSpeed + " Cadence: " + mLastCadence);
+                }
+
+                switch (mWidgetType){
+                    case WIDGET_CSC_SPEED:
+                        setValue(mLastSensorSpeed);
+                        break;
+                    case WIDGET_CSC_CADENCE:
+                        setValue(mLastCadence);
+                        break;
+                }
+            }
+        };
+
+        private static IntentFilter makeGattUpdateIntentFilter() {
+            final IntentFilter intentFilter = new IntentFilter();
+//            intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+            intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+//            intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+            intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+            return intentFilter;
         }
     }
 }

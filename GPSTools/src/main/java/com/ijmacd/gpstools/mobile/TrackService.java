@@ -4,7 +4,12 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
@@ -19,6 +24,9 @@ import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.widget.Toast;
 import com.ijmacd.gpstools.mobile.R;
+import com.movisens.smartgattlib.Characteristic;
+
+import java.util.List;
 
 public class TrackService extends Service {
     private static final String LOG_TAG = "TrackService";
@@ -41,6 +49,9 @@ public class TrackService extends Service {
 
     final private TrackService self = this;
 
+    private double mLastSensorSpeed;
+    private double mLastCadence;
+
 
     @Override
     public void onCreate() {
@@ -53,6 +64,9 @@ public class TrackService extends Service {
         mUpdateInterval = Integer.parseInt(preferences.getString(updateKey, MIN_TIME+""));
 
         Log.d(LOG_TAG, "onCreate()");
+
+
+        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
     }
 
     @Override
@@ -82,6 +96,8 @@ public class TrackService extends Service {
         Log.d(LOG_TAG, "onDestroy()");
         // Cancel the persistent notification.
         mNotificationManager.cancel(NOTIFICATION);
+
+        unregisterReceiver(mGattUpdateReceiver);
 
         stopLogging();
     }
@@ -197,7 +213,10 @@ public class TrackService extends Service {
 
         public void onLocationChanged(Location loc) {
             if (loc != null) {
-                mTrack.addPoint(new Point(loc));
+                Point p = new Point(loc);
+                p.setSensorSpeed(mLastSensorSpeed);
+                p.setCadence(mLastCadence);
+                mTrack.addPoint(p);
             }
         }
 
@@ -226,4 +245,50 @@ public class TrackService extends Service {
         }
 
     };
+    // Handles various events fired by the Service.
+    // ACTION_GATT_CONNECTED: connected to a GATT server.
+    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+    // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
+    //                        or notification operations.
+    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+//                mConnected = true;
+//                updateConnectionState(R.string.connected);
+//                invalidateOptionsMenu();
+                Log.d(LOG_TAG, "BLE Connected");
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+//                mConnected = false;
+//                updateConnectionState(R.string.disconnected);
+//                invalidateOptionsMenu();
+//                clearUI();
+                Log.d(LOG_TAG, "BLE Disconnected");
+                mLastSensorSpeed = 0;
+                mLastCadence = 0;
+            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                // Show all the supported services and characteristics on the user interface.
+//                displayGattServices(mBluetoothLeService.getSupportedGattServices());
+                Log.d(LOG_TAG, "BLE Discovered services");
+
+            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+//                displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+//                Log.d(LOG_TAG, "BLE Data: " + intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+                mLastSensorSpeed = intent.getDoubleExtra(BluetoothLeService.EXTRA_SPEED, 0);
+                mLastCadence = intent.getDoubleExtra(BluetoothLeService.EXTRA_CADENCE, 0);
+                Log.d(LOG_TAG, "Speed: " + mLastSensorSpeed + " Cadence: " + mLastCadence);
+            }
+        }
+    };
+
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        return intentFilter;
+    }
 }

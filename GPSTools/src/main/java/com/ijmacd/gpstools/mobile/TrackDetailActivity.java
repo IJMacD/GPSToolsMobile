@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,6 +28,7 @@ import java.text.SimpleDateFormat;
  */
 public class TrackDetailActivity extends ActionBarActivity {
 
+    private static final String LOG_TAG = "TrackDetailActivity";
     TextView mNameText;
     TextView mStartText;
     TextView mDistanceText;
@@ -86,9 +88,12 @@ public class TrackDetailActivity extends ActionBarActivity {
                 return true;
             case R.id.action_export:
                 if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
-                    File directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                    File directory = new File("/storage/sdcard0");
+                    if(!directory.isDirectory())
+                        directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                     if(GPXExport.exportGPX(mTrack, directory)){
                         Toast.makeText(this, R.string.track_saved, Toast.LENGTH_SHORT).show();
+                        Log.d(LOG_TAG, "Track exported to " + directory.getAbsolutePath());
                     }
                 }
                 else {

@@ -180,4 +180,16 @@
         <type>167</type>
         <category>sensor</category>
     </widget>
+    <widget>
+        <name>Speed Sensor</name>
+        <description>Cycling Speed Sensor</description>
+        <type>168</type>
+        <category>sensor</category>
+    </widget>
+    <widget>
+        <name>Cadence Sensor</name>
+        <description>Cycling Cadence Sensor</description>
+        <type>169</type>
+        <category>sensor</category>
+    </widget>
 </widget_types>
