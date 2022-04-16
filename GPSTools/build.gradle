@@ -1,37 +1,34 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.0'
-    }
-}
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 repositories {
-    mavenCentral()
+    google()
+    jcenter()
     maven { url "https://jitpack.io" }
 }
 
 android {
     compileSdkVersion 19
-    buildToolsVersion '19.1.0'
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
+        applicationId "com.ijmacd.gpstools.mobile"
         minSdkVersion 14
         targetSdkVersion 19
+        versionCode 2
+        versionName "1.1"
     }
     buildTypes {
         release {
-            proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    productFlavors {
+    lintOptions {
+        abortOnError false
     }
 }
 
 dependencies {
-    compile 'com.android.support:gridlayout-v7:19.0.0'
-    compile 'com.android.support:appcompat-v7:19.0.0'
-    compile 'com.github.movisens:SmartGattLib:1.7'
+    implementation 'com.android.support:gridlayout-v7:19.0.0'
+    implementation 'com.android.support:appcompat-v7:19.0.0'
+    implementation 'com.github.movisens:SmartGattLib:1.7'
 }

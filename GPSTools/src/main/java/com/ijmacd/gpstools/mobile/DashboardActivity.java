@@ -75,6 +75,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
     private static final String PREF_ORIENTATION = "pref_orientation";
+    private static final String STATE_WIDGET_VALUES = "state_widget_values";
 
     private TrackService mTrackService;
 
@@ -118,6 +119,9 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(LOG_TAG, "onCreate()");
+
         setContentView(R.layout.activity_dashboard);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -218,6 +222,24 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         if(mWidgets.size() == 0){
             addDefaultWidgets();
         }
+        else if(savedInstanceState != null) {
+            setWidgetValues(savedInstanceState.getDoubleArray(STATE_WIDGET_VALUES));
+        }
+    }
+
+    private void setWidgetValues(double[] values) {
+        if(values.length != mWidgets.size()){
+            Log.i(LOG_TAG, String.format("Don't have the same number of widgets\nThen: %s Now: %s", values.length, mWidgets.size()));
+        }
+
+        int i = 0;
+        for(DashboardWidget widget : mWidgets){
+            if(i >= values.length) break;
+
+            widget.setValue(values[i]);
+
+            i++;
+        }
     }
 
     private void updateOrientation() {
@@ -307,6 +329,19 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         // Serialize the current dropdown position.
         outState.putInt(STATE_SELECTED_NAVIGATION_ITEM,
                 getSupportActionBar().getSelectedNavigationIndex());
+
+        outState.putDoubleArray(STATE_WIDGET_VALUES, getWidgetValues());
+    }
+
+    private double[] getWidgetValues() {
+        double[] values = new double[mWidgets.size()];
+        int i = 0;
+        for(DashboardWidget widget : mWidgets){
+            values[i] = widget.getValue();
+            Log.d(LOG_TAG, String.format("Save value: %s", values[i]));
+            i++;
+        }
+        return values;
     }
 
     @Override
@@ -429,6 +464,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
     void doBindService() {
         Intent intent = new Intent(this, TrackService.class);
+        // Should start/stop service only when recording
         startService(intent);
         // Establish a connection with the service.  We use an explicit
         // class name because we want a specific service implementation that
@@ -438,8 +474,12 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         mIsBound = true;
         Log.d(LOG_TAG, "Track Service Bound");
 
-        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+            // Should kill service when not recording etc.
+            startService(gattServiceIntent);
+            bindService(gattServiceIntent, mServiceConnection, 0);
+        }
 
     }
 

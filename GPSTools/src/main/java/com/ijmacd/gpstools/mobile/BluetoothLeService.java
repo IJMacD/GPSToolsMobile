@@ -35,7 +35,6 @@ import java.util.UUID;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class BluetoothLeService extends Service {
     private final static String TAG = BluetoothLeService.class.getSimpleName();
-    private static final double WHEEL_DIAMETER = 0.7d;
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -61,6 +60,11 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.EXTRA_DATA";
     public static final String EXTRA_SPEED = "com.ijmacd.gpstools.EXTRA_SPEED";
     public static final String EXTRA_CADENCE = "com.ijmacd.gpstools.EXTRA_CADENCE";
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
 
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.

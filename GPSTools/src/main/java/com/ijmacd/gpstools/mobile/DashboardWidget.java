@@ -98,6 +98,7 @@ public class DashboardWidget extends FrameLayout
 
     private static final int DATE_UPDATE_INTERVAL = 200;
     private static final int GPS_UPDATE_INTERVAL = 1000;
+    private static final String LOG_TAG = "DashboardWidget";
 
     private int mWidgetType;
     private int mUnitsType = UNITS_DEFAULT;
@@ -277,6 +278,7 @@ public class DashboardWidget extends FrameLayout
 	}
 
 	public void setValue(double value) {
+//        Log.d(LOG_TAG, String.format("Value set: %s", value));
 		this.mValue = value;
         if(Double.isNaN(value)){
             value = 0;

@@ -6,7 +6,7 @@ import com.movisens.smartgattlib.GattByteBuffer;
  * Created by Iain on 28/11/2015.
  */
 public class SpeedCadenceMeasurement {
-    private static final double WHEEL_DIAMETER = 0.7d;
+
     public final Long cumulativeWheelRevolutions;
     public final float lastWheelEventTime;
     public final int cumulativeCrankRevolutions;

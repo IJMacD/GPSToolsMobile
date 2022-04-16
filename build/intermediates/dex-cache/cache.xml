@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\Iain\.gradle\caches\modules-2\files-2.1\com.github.movisens\SmartGattLib\1.7\6632314f247a0f74943075230a16b1edc76d96d1\SmartGattLib-1.7.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="6632314f247a0f74943075230a16b1edc76d96d1">
+        <dex dex="D:\Code\GPSToolsMobile\GPSTools\build\intermediates\pre-dexed\release\SmartGattLib-1.7_bbb625216f1f3f92ab9cf736226b90b6a07b23a6.jar" />
+    </item>
+    <item
+        jar="D:\Code\GPSToolsMobile\GPSTools\build\intermediates\exploded-aar\com.android.support\gridlayout-v7\19.0.0\jars\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="2ada8b8f7c8fa9ddb6734e527d8e99d2f90174a3">
+        <dex dex="D:\Code\GPSToolsMobile\GPSTools\build\intermediates\pre-dexed\release\com.android.support-gridlayout-v7-19.0.0_ce01e5a9ab8e714b3a144fd70ef6f47f7b29fb97.jar" />
+    </item>
+    <item
+        jar="D:\Code\GPSToolsMobile\GPSTools\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.0.0\jars\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="eb69b5c2e53e59d82f7439f3217f46f9d98f0c89">
+        <dex dex="D:\Code\GPSToolsMobile\GPSTools\build\intermediates\pre-dexed\release\com.android.support-appcompat-v7-19.0.0_b65c376ded6d47a9848425a796fa135fcc63714e.jar" />
+    </item>
+    <item
+        jar="C:\Users\Iain\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-v4\19.0.0\support-v4-19.0.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="afee690af14bd2c32d400cdf78e746fd45c386fa">
+        <dex dex="D:\Code\GPSToolsMobile\GPSTools\build\intermediates\pre-dexed\release\support-v4-19.0.0_36447f8a210adad307291748fdf61f9f5ca63e35.jar" />
+    </item>
+
+</items>
