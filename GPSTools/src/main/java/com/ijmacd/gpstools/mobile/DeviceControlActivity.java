@@ -12,7 +12,7 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v7.app.ActionBarActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Created by Iain on 28/11/2015.
  */
-public class DeviceControlActivity extends ActionBarActivity {
+public class DeviceControlActivity extends AppCompatActivity {
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
     private static final String TAG = "DeviceControlActivity";

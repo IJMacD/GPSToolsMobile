@@ -9,7 +9,7 @@ import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.graphics.Rect;
-import android.support.v7.widget.GridLayout;
+import androidx.gridlayout.widget.GridLayout;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.ImageView;

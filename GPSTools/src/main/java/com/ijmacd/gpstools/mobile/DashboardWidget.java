@@ -1,6 +1,8 @@
 package com.ijmacd.gpstools.mobile;
 
+import android.Manifest;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.*;
@@ -10,6 +12,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.*;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -19,6 +22,9 @@ import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -189,10 +195,14 @@ public class DashboardWidget extends FrameLayout
         }
 
         mTextShader = new LinearGradient(0, 0, 0, 1,
-                new int[]{Color.rgb(255,255,255),Color.rgb(128,128,128),Color.rgb(255,255,255)},
+                new int[]{
+                        Color.rgb(255,255,255),
+                        Color.rgb(128,128,128),
+                        Color.rgb(255,255,255)},
                 new float[]{0, 0.75f, 1}, Shader.TileMode.CLAMP);
         mTextShaderMatrix = new Matrix();
 
+        mValueText.getPaint().setAlpha(255);
         mValueText.getPaint().setShader(mTextShader);
 
         if (mWidgetType < 64){}
@@ -373,10 +383,10 @@ public class DashboardWidget extends FrameLayout
                     mValueFormat = "%.1f";
                     break;
                 case WIDGET_LATITUDE:
-                    mValueFormat = "%05.3f";
+                    mValueFormat = "%06.3f";
                     break;
                 case WIDGET_LONGITUDE:
-                    mValueFormat = "%06.3f";
+                    mValueFormat = "%07 .3f";
                     break;
                 case WIDGET_DISTANCE:
                 case WIDGET_HEADING:
@@ -605,8 +615,10 @@ public class DashboardWidget extends FrameLayout
         @Override
         public void onResume(){
             super.onResume();
+
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     GPS_UPDATE_INTERVAL, 0, mLocationListener);
+
         }
 
         @Override

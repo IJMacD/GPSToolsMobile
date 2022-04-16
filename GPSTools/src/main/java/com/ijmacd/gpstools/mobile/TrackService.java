@@ -19,10 +19,12 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.TaskStackBuilder;
+
 import com.ijmacd.gpstools.mobile.R;
 import com.movisens.smartgattlib.Characteristic;
 

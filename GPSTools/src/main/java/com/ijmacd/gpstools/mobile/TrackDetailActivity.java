@@ -5,15 +5,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.NavUtils;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NavUtils;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -26,7 +27,7 @@ import java.text.SimpleDateFormat;
  * Time: 17:21
  * To change this template use File | Settings | File Templates.
  */
-public class TrackDetailActivity extends ActionBarActivity {
+public class TrackDetailActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "TrackDetailActivity";
     TextView mNameText;

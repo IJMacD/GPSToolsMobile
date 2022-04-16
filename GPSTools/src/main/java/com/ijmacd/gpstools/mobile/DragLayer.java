@@ -2,10 +2,11 @@ package com.ijmacd.gpstools.mobile;
 
 import android.content.Context;
 import android.graphics.*;
-import android.support.v7.widget.GridLayout;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
+
+import androidx.gridlayout.widget.GridLayout;
 
 public class DragLayer extends FrameLayout {
 

@@ -1,5 +1,6 @@
 package com.ijmacd.gpstools.mobile;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.app.TaskStackBuilder;
@@ -15,6 +16,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -22,12 +24,17 @@ import android.graphics.Canvas;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayout;
+import androidx.gridlayout.widget.GridLayout;
+import androidx.legacy.widget.Space;
+
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.DragEvent;
@@ -39,7 +46,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.support.v7.widget.Space;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.NumberPicker;
@@ -52,7 +58,7 @@ import com.movisens.smartgattlib.Descriptor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DashboardActivity extends ActionBarActivity implements ActionBar.OnNavigationListener {
+public class DashboardActivity extends AppCompatActivity implements ActionBar.OnNavigationListener {
 
     private static final String LOG_TAG = "GPSTools";
 
@@ -67,6 +73,8 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     public static final String EXTRA_UNITS = "units";
 
     public static final String EXTRA_TRACK = "track";
+
+    private static final int REQUEST_PERMISSION_LOCATION = 1;
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -178,12 +186,12 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener(this, mDrawerLayout));
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+                null, R.string.drawer_open, R.string.drawer_close) {
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                getActionBar().setTitle(mTitle);
+                actionBar.setTitle(mTitle);
                 actionBar.setDisplayShowTitleEnabled(false);
                 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
@@ -192,7 +200,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                getActionBar().setTitle(mDrawerTitle);
+                actionBar.setTitle(mDrawerTitle);
                 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
                 actionBar.setDisplayShowTitleEnabled(true);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
@@ -202,8 +210,8 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
 
         android.graphics.Point size = new android.graphics.Point();
         getWindowManager().getDefaultDisplay().getSize(size);
@@ -307,6 +315,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
         // Serialize the current dropdown position.
         outState.putInt(STATE_SELECTED_NAVIGATION_ITEM,
                 getSupportActionBar().getSelectedNavigationIndex());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -487,6 +496,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
     // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
     //                        or notification operations.
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
@@ -841,6 +851,7 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
         DashboardWidget widget = DashboardWidget.WidgetFactory(this, widgetType, unitsType);
 
+
         GridLayout.Spec colSpec = GridLayout.spec(GridLayout.UNDEFINED, colSpan);
         GridLayout.Spec rowSpec = GridLayout.spec(GridLayout.UNDEFINED, rowSpan);
         GridLayout.LayoutParams params = new GridLayout.LayoutParams(rowSpec, colSpec);
@@ -864,6 +875,17 @@ public class DashboardActivity extends ActionBarActivity implements ActionBar.On
 
         mWidgets.add(widget);
         mGridLayout.addView(widget);
+
+        if ((widget instanceof DashboardWidget.GPSLocationWidget
+                || widget instanceof DashboardWidget.GPSStatusWidget)
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this, new String[] {
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+            }, REQUEST_PERMISSION_LOCATION);
+            return;
+        }
 
         widget.onResume();
     }

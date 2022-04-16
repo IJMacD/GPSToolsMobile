@@ -5,16 +5,17 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 
 /**
@@ -24,7 +25,7 @@ import android.widget.*;
  * Time: 17:20
  * To change this template use File | Settings | File Templates.
  */
-public class TrackListActivity extends ActionBarActivity implements ActionBar.OnNavigationListener {
+public class TrackListActivity extends AppCompatActivity implements ActionBar.OnNavigationListener {
 
     private SimpleCursorAdapter mAdapter;
     private ActionMode mActionMode;
@@ -168,7 +169,7 @@ public class TrackListActivity extends ActionBarActivity implements ActionBar.On
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener(this, mDrawerLayout));
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+                null, R.string.drawer_open, R.string.drawer_close) {
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {

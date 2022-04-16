@@ -12,8 +12,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.widget.DrawerLayout;
+import androidx.drawerlayout.widget.DrawerLayout;
+//import androidx.appcompat.widget.
+//.support.v4.app.ActionBarDrawerToggle;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,7 +41,7 @@ public class BLEActivity extends ListActivity implements ActionBar.OnNavigationL
     private TextView mTextView;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-    private ActionBarDrawerToggle mDrawerToggle;
+//    private ActionBarDrawerToggle mDrawerToggle;
     private CharSequence mTitle;
     private CharSequence mDrawerTitle;
     private BluetoothAdapter mBluetoothAdapter;
@@ -113,32 +114,32 @@ public class BLEActivity extends ListActivity implements ActionBar.OnNavigationL
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, navigationLabels));
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener(this, mDrawerLayout));
+//        mDrawerList.setOnItemClickListener(new DrawerItemClickListener(this, mDrawerLayout));
 
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
-
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                getActionBar().setTitle(mTitle);
-                actionBar.setDisplayShowTitleEnabled(false);
-                actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_LIST);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                getActionBar().setTitle(mDrawerTitle);
-                actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_STANDARD);
-                actionBar.setDisplayShowTitleEnabled(true);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-        };
-
-        // Set the drawer toggle as the DrawerListener
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+//        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+//                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
+//
+//            /** Called when a drawer has settled in a completely closed state. */
+//            public void onDrawerClosed(View view) {
+//                super.onDrawerClosed(view);
+//                getActionBar().setTitle(mTitle);
+//                actionBar.setDisplayShowTitleEnabled(false);
+//                actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_LIST);
+//                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+//            }
+//
+//            /** Called when a drawer has settled in a completely open state. */
+//            public void onDrawerOpened(View drawerView) {
+//                super.onDrawerOpened(drawerView);
+//                getActionBar().setTitle(mDrawerTitle);
+//                actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_STANDARD);
+//                actionBar.setDisplayShowTitleEnabled(true);
+//                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+//            }
+//        };
+//
+//        // Set the drawer toggle as the DrawerListener
+//        mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
@@ -310,6 +311,7 @@ public class BLEActivity extends ListActivity implements ActionBar.OnNavigationL
 
     // Device scan callback.
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 ?
             new BluetoothAdapter.LeScanCallback() {
 
                 @Override
@@ -322,7 +324,8 @@ public class BLEActivity extends ListActivity implements ActionBar.OnNavigationL
                         }
                     });
                 }
-            };
+            } :
+            null;
 
     static class ViewHolder {
         TextView deviceName;
